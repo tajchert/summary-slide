@@ -31,6 +31,16 @@ describe("slideDocumentSchema", () => {
     doc.cards = [{ id: "a", type: "headline", grid: { x: 12, y: 0, w: 1, h: 1 },
       content: { text: { text: "x" } } } as never];
     expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+
+    const overflowCols = blankDocument();
+    overflowCols.cards = [{ id: "a", type: "headline", grid: { x: 11, y: 0, w: 2, h: 1 },
+      content: { text: { text: "x" } } } as never];
+    expect(slideDocumentSchema.safeParse(overflowCols).success).toBe(false);
+
+    const overflowRows = blankDocument();
+    overflowRows.cards = [{ id: "a", type: "headline", grid: { x: 0, y: 5, w: 1, h: 2 },
+      content: { text: { text: "x" } } } as never];
+    expect(slideDocumentSchema.safeParse(overflowRows).success).toBe(false);
   });
 
   it("rejects unknown card types", () => {

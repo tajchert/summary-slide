@@ -26,7 +26,9 @@ export const gridSchema = z.object({
   y: z.number().int().min(0).max(GRID_ROWS - 1),
   w: z.number().int().min(1).max(GRID_COLS),
   h: z.number().int().min(1).max(GRID_ROWS),
-});
+})
+  .refine((g) => g.x + g.w <= GRID_COLS, { message: "card overflows grid columns" })
+  .refine((g) => g.y + g.h <= GRID_ROWS, { message: "card overflows grid rows" });
 export type GridRect = z.infer<typeof gridSchema>;
 
 const cardBase = {
@@ -83,8 +85,8 @@ export const slideDocumentSchema = z.object({
   title: z.string(),
   canvas: z.object({
     format: z.literal("16:9"),
-    width: z.number(),
-    height: z.number(),
+    width: z.number().positive(),
+    height: z.number().positive(),
   }),
   theme: z.object({
     mode: z.enum(["light", "dark"]),
