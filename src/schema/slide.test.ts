@@ -1,0 +1,48 @@
+import { describe, it, expect } from "vitest";
+import { slideDocumentSchema, blankDocument, GRID_COLS, GRID_ROWS } from "./slide";
+
+describe("slideDocumentSchema", () => {
+  it("accepts a blank document", () => {
+    expect(slideDocumentSchema.safeParse(blankDocument()).success).toBe(true);
+  });
+
+  it("accepts every card type", () => {
+    const doc = blankDocument();
+    doc.cards = [
+      { id: "a", type: "stat", grid: { x: 0, y: 0, w: 2, h: 1 },
+        content: { value: { text: "48MP" }, caption: { text: "Fusion camera" } } },
+      { id: "b", type: "headline", grid: { x: 2, y: 0, w: 4, h: 1 },
+        content: { text: { text: "Spotlight actions" } } },
+      { id: "c", type: "image", grid: { x: 6, y: 0, w: 3, h: 2 },
+        content: { src: "/i/x.png", fit: "cover" } },
+      { id: "d", type: "icon", grid: { x: 9, y: 0, w: 1, h: 1 },
+        content: { icon: { kind: "emoji", value: "📞" }, label: { text: "Phone" }, layout: "top" } },
+      { id: "e", type: "hero", grid: { x: 0, y: 2, w: 6, h: 3 },
+        content: { title: { text: "macOS" } } },
+      { id: "f", type: "list", grid: { x: 6, y: 2, w: 3, h: 2 },
+        content: { title: { text: "More" }, items: [{ text: "Wi-Fi 7" }], marker: "bullet" } },
+    ];
+    const res = slideDocumentSchema.safeParse(doc);
+    expect(res.success).toBe(true);
+  });
+
+  it("rejects out-of-bounds grid placement", () => {
+    const doc = blankDocument();
+    doc.cards = [{ id: "a", type: "headline", grid: { x: 12, y: 0, w: 1, h: 1 },
+      content: { text: { text: "x" } } } as never];
+    expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+  });
+
+  it("rejects unknown card types", () => {
+    const doc = blankDocument();
+    doc.cards = [{ id: "a", type: "video", grid: { x: 0, y: 0, w: 1, h: 1 }, content: {} } as never];
+    expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+  });
+
+  it("blankDocument has 16:9 canvas and constants match", () => {
+    const doc = blankDocument();
+    expect(doc.canvas).toEqual({ format: "16:9", width: 1920, height: 1080 });
+    expect(GRID_COLS).toBe(12);
+    expect(GRID_ROWS).toBe(6);
+  });
+});
