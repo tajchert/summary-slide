@@ -1,6 +1,12 @@
 node_modules/
 dist/
+dist-ssr/
 .superpowers/
 .wrangler/
 .env
 .DS_Store
+*.local
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea
