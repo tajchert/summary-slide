@@ -20,7 +20,7 @@ export function backgroundToCss(bg: Background): CSSProperties {
     case "gradient":
       return { background: `linear-gradient(${bg.angle}deg, ${bg.from}, ${bg.to})` };
     case "image":
-      return { backgroundImage: `url(${bg.src})`, backgroundSize: "cover", backgroundPosition: "center" };
+      return { backgroundImage: `url("${bg.src}")`, backgroundSize: "cover", backgroundPosition: "center" };
   }
 }
 
@@ -49,6 +49,7 @@ export function richTextToCss(rt: RichText): CSSProperties {
     css.WebkitBackgroundClip = "text";
     css.backgroundClip = "text";
     css.color = "transparent";
+    css.WebkitTextFillColor = "transparent";
   }
   return css;
 }

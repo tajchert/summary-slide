@@ -31,7 +31,12 @@ describe("backgroundToCss", () => {
   });
   it("image", () => {
     expect(backgroundToCss({ type: "image", src: "/i/x.png" })).toEqual({
-      backgroundImage: "url(/i/x.png)", backgroundSize: "cover", backgroundPosition: "center",
+      backgroundImage: 'url("/i/x.png")', backgroundSize: "cover", backgroundPosition: "center",
+    });
+  });
+  it("image src with spaces and parentheses is quoted", () => {
+    expect(backgroundToCss({ type: "image", src: "/uploads/my bg (1).png" })).toEqual({
+      backgroundImage: 'url("/uploads/my bg (1).png")', backgroundSize: "cover", backgroundPosition: "center",
     });
   });
 });
@@ -67,5 +72,6 @@ describe("richTextToCss (field-level overrides)", () => {
     expect(css.backgroundImage).toBe("linear-gradient(90deg, #f55, #5af)");
     expect(css.WebkitBackgroundClip).toBe("text");
     expect(css.color).toBe("transparent");
+    expect(css.WebkitTextFillColor).toBe("transparent");
   });
 });
