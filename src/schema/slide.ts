@@ -87,6 +87,14 @@ export const cardSchema = z.discriminatedUnion("type", [
     })).min(1).max(12),
     caption: richTextSchema.optional(),
   }) }),
+  z.object({ ...cardBase, type: z.literal("statGroup"), content: z.object({
+    stats: z.array(z.object({
+      prefix: richTextSchema.optional(),
+      value: richTextSchema,
+      caption: richTextSchema.optional(),
+    })).min(1).max(6),
+    layout: z.enum(["column", "row"]),
+  }) }),
 ]);
 export type Card = z.infer<typeof cardSchema>;
 export type CardType = Card["type"];

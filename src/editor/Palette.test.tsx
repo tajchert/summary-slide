@@ -14,7 +14,7 @@ describe("Palette", () => {
         <Palette />
       </EditorStoreContext.Provider>
     );
-    expect(screen.getAllByRole("button")).toHaveLength(7);
+    expect(screen.getAllByRole("button")).toHaveLength(8);
     await userEvent.click(screen.getByRole("button", { name: "Stat" }));
     expect(store.getState().doc.cards).toHaveLength(1);
     expect(store.getState().doc.cards[0].type).toBe("stat");
@@ -44,5 +44,16 @@ describe("Palette", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "Icon row" }));
     expect(store.getState().doc.cards[0].type).toBe("iconRow");
+  });
+
+  it("adds a statGroup card", async () => {
+    const store = createEditorStore(blankDocument(), "t4");
+    render(
+      <EditorStoreContext.Provider value={store}>
+        <Palette />
+      </EditorStoreContext.Provider>
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Stat group" }));
+    expect(store.getState().doc.cards[0].type).toBe("statGroup");
   });
 });

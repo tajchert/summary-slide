@@ -19,5 +19,10 @@ export function newCard(type: CardType, grid: GridRect): Card {
         { icon: { kind: "emoji", value: "📷" }, label: { text: "0.5x" } },
         { icon: { kind: "emoji", value: "📷" }, label: { text: "2x" } },
       ] } };
+    case "statGroup": return { id, type, grid, content: {
+      stats: [
+        { prefix: { text: "Up to" }, value: { text: "16-core" }, caption: { text: "CPU" } },
+        { prefix: { text: "Up to" }, value: { text: "40-core" }, caption: { text: "GPU" } },
+      ], layout: "column" } };
   }
 }

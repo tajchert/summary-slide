@@ -95,6 +95,38 @@ describe("Inspector", () => {
     expect(screen.queryByRole("button", { name: /remove item/i })).not.toBeInTheDocument();
   });
 
+  it("statGroup: edits a stat value, toggles layout, adds and removes stats", async () => {
+    const store = setup("statGroup");
+    const input = screen.getByLabelText(/value 1/i);
+    await userEvent.clear(input);
+    await userEvent.type(input, "40-core");
+    let card = store.getState().doc.cards[0];
+    expect(card.type === "statGroup" && card.content.stats[0].value.text).toBe("40-core");
+
+    await userEvent.selectOptions(screen.getByLabelText(/layout/i), "row");
+    card = store.getState().doc.cards[0];
+    expect(card.type === "statGroup" && card.content.layout).toBe("row");
+
+    await userEvent.click(screen.getByRole("button", { name: /\+ add stat/i }));
+    card = store.getState().doc.cards[0];
+    expect(card.type === "statGroup" && card.content.stats).toHaveLength(3);
+
+    await userEvent.click(screen.getByRole("button", { name: /remove stat 3/i }));
+    await userEvent.click(screen.getByRole("button", { name: /remove stat 2/i }));
+    card = store.getState().doc.cards[0];
+    expect(card.type === "statGroup" && card.content.stats).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: /remove stat/i })).not.toBeInTheDocument();
+  });
+
+  it("statGroup: disables add at 6 stats", async () => {
+    const store = setup("statGroup");
+    const addBtn = screen.getByRole("button", { name: /\+ add stat/i });
+    for (let k = 0; k < 4; k++) await userEvent.click(addBtn);
+    const card = store.getState().doc.cards[0];
+    expect(card.type === "statGroup" && card.content.stats).toHaveLength(6);
+    expect(addBtn).toBeDisabled();
+  });
+
   it("iconRow: disables + Add item at 12 items", async () => {
     const store = createEditorStore(blankDocument(), "t");
     store.getState().addCard("iconRow");

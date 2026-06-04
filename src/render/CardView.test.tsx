@@ -93,6 +93,28 @@ describe("CardView", () => {
     expect(screen.getByText("⚡")).toBeInTheDocument();
   });
 
+  it("statGroup column renders stacked stats with prefix/value/caption", () => {
+    const { container } = renderCard({ ...base, type: "statGroup", content: {
+      layout: "column", stats: [
+        { prefix: { text: "Up to" }, value: { text: "16-core" }, caption: { text: "CPU" } },
+        { prefix: { text: "Up to" }, value: { text: "40-core" }, caption: { text: "GPU" } },
+      ] } });
+    expect(screen.getAllByText("Up to")).toHaveLength(2);
+    expect(screen.getByText("16-core")).toBeInTheDocument();
+    expect(screen.getByText("40-core")).toBeInTheDocument();
+    expect((container.firstChild!.firstChild as HTMLElement).style.flexDirection).toBe("column");
+    expect(container.querySelectorAll("[data-divider]")).toHaveLength(0);
+  });
+
+  it("statGroup row renders side-by-side stats with dividers between them", () => {
+    const { container } = renderCard({ ...base, type: "statGroup", content: {
+      layout: "row", stats: [
+        { value: { text: '6.9"' } }, { value: { text: '6.3"' } },
+      ] } });
+    expect((container.firstChild!.firstChild as HTMLElement).style.flexDirection).toBe("row");
+    expect(container.querySelectorAll("[data-divider]")).toHaveLength(1);
+  });
+
   it("applies card style override on the wrapper", () => {
     const { container } = renderCard({ ...base, type: "headline",
       style: { background: { type: "solid", color: "#ff0000" }, textColor: "#00ff00" },

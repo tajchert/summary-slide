@@ -175,6 +175,48 @@ export function Inspector() {
         </>
       )}
 
+      {card.type === "statGroup" && (
+        <>
+          {card.content.stats.map((stat, i) => (
+            <div key={i} className="mb-2 rounded border border-neutral-800 p-2">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Stat {i + 1}</span>
+                {card.content.stats.length > 1 && (
+                  <button aria-label={`Remove stat ${i + 1}`}
+                    onClick={() => updateCard(card.id, (c) => {
+                      if (c.type === "statGroup") c.content.stats.splice(i, 1);
+                    })}
+                    className="text-neutral-500 hover:text-red-400">✕</button>
+                )}
+              </div>
+              {rt(`Prefix (optional) ${i + 1}`, stat.prefix ?? { text: "" }, (c, v) => {
+                if (c.type === "statGroup" && c.content.stats[i])
+                  c.content.stats[i].prefix = v.text ? v : undefined;
+              })}
+              {rt(`Value ${i + 1}`, stat.value, (c, v) => {
+                if (c.type === "statGroup" && c.content.stats[i]) c.content.stats[i].value = v;
+              })}
+              {rt(`Caption (optional) ${i + 1}`, stat.caption ?? { text: "" }, (c, v) => {
+                if (c.type === "statGroup" && c.content.stats[i])
+                  c.content.stats[i].caption = v.text ? v : undefined;
+              })}
+            </div>
+          ))}
+          <button disabled={card.content.stats.length >= 6}
+            onClick={() => updateCard(card.id, (c) => {
+              if (c.type === "statGroup") c.content.stats.push({ value: { text: "2x" } });
+            })} className="mb-2 rounded border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-800
+              disabled:opacity-40 disabled:cursor-not-allowed">
+            + Add stat
+          </button>
+          <SelectInput label="Layout" value={card.content.layout}
+            options={["column", "row"] as const}
+            onChange={(layout) => updateCard(card.id, (c) => {
+              if (c.type === "statGroup") c.content.layout = layout;
+            })} />
+        </>
+      )}
+
       {card.type === "list" && (
         <>
           {rt("Title", card.content.title, (c, v) => { if (c.type === "list") c.content.title = v; })}

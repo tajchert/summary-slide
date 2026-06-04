@@ -26,6 +26,11 @@ describe("slideDocumentSchema", () => {
           { icon: { kind: "emoji", value: "📷" }, label: { text: "0.5x" } },
           { icon: { kind: "image", src: "/i/port.png" } },
         ], caption: { text: "Four lenses in your pocket" } } },
+      { id: "h", type: "statGroup", grid: { x: 0, y: 5, w: 3, h: 1 },
+        content: { layout: "row", stats: [
+          { value: { text: '6.9"' }, caption: { text: "Pro Max" } },
+          { prefix: { text: "Up to" }, value: { text: '6.3"' } },
+        ] } },
     ];
     const res = slideDocumentSchema.safeParse(doc);
     expect(res.success).toBe(true);
@@ -51,6 +56,21 @@ describe("slideDocumentSchema", () => {
   it("rejects unknown card types", () => {
     const doc = blankDocument();
     doc.cards = [{ id: "a", type: "video", grid: { x: 0, y: 0, w: 1, h: 1 }, content: {} } as never];
+    expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+  });
+
+  it("rejects a statGroup with zero stats", () => {
+    const doc = blankDocument();
+    doc.cards = [{ id: "a", type: "statGroup", grid: { x: 0, y: 0, w: 3, h: 2 },
+      content: { stats: [], layout: "column" } } as never];
+    expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+  });
+
+  it("rejects a statGroup with more than 6 stats", () => {
+    const doc = blankDocument();
+    doc.cards = [{ id: "a", type: "statGroup", grid: { x: 0, y: 0, w: 3, h: 2 },
+      content: { stats: Array.from({ length: 7 }, () => ({ value: { text: "2x" } })),
+        layout: "column" } } as never];
     expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
   });
 

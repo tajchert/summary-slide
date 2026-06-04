@@ -10,6 +10,7 @@ const TILES: { type: CardType; label: string; glyph: string }[] = [
   { type: "hero", label: "Hero", glyph: "★" },
   { type: "list", label: "List", glyph: "≡" },
   { type: "iconRow", label: "Icon row", glyph: "🔌🎧" },
+  { type: "statGroup", label: "Stat group", glyph: "2×|4×" },
 ];
 
 export function Palette() {
