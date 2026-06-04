@@ -9,7 +9,8 @@ export const slides = new Hono<{ Bindings: Env }>();
 
 slides.post("/", async (c) => {
   const raw = await c.req.text();
-  if (raw.length > MAX_DOC_BYTES) {
+  // Byte-accurate cap: string .length under-counts multi-byte UTF-8 (emoji in cards).
+  if (new TextEncoder().encode(raw).byteLength > MAX_DOC_BYTES) {
     return c.json({ error: "Document too large" }, 413);
   }
   let parsed: unknown;
