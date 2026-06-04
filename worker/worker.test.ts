@@ -142,12 +142,16 @@ describe("rate limiting", () => {
   it("returns 429 when the limiter denies", async () => {
     const orig = env.RATE_LIMITER;
     (env as { RATE_LIMITER: unknown }).RATE_LIMITER = { limit: async () => ({ success: false }) };
-    const res = await request("/api/slides", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: "{}",
-    });
-    (env as { RATE_LIMITER: unknown }).RATE_LIMITER = orig;
-    expect(res.status).toBe(429);
+    try {
+      const res = await request("/api/slides", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: "{}",
+      });
+      expect(res.status).toBe(429);
+    } finally {
+      // unconditional restore so a mid-flight throw can't leak the denying stub into later tests
+      (env as { RATE_LIMITER: unknown }).RATE_LIMITER = orig;
+    }
   });
 });
