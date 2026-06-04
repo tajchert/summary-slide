@@ -61,6 +61,13 @@ describe("slideDocumentSchema", () => {
     expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
   });
 
+  it("rejects an iconRow with more than 12 items", () => {
+    const doc = blankDocument();
+    doc.cards = [{ id: "a", type: "iconRow", grid: { x: 0, y: 0, w: 3, h: 1 },
+      content: { items: Array.from({ length: 13 }, () => ({ icon: { kind: "emoji", value: "📷" } })) } } as never];
+    expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+  });
+
   it("blankDocument has 16:9 canvas and constants match", () => {
     const doc = blankDocument();
     expect(doc.canvas).toEqual({ format: "16:9", width: 1920, height: 1080 });

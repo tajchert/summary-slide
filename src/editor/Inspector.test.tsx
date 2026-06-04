@@ -82,4 +82,25 @@ describe("Inspector", () => {
     expect(card.type === "iconRow" && card.content.items).toHaveLength(1);
     expect(screen.queryByRole("button", { name: /remove item/i })).not.toBeInTheDocument();
   });
+
+  it("iconRow: disables + Add item at 12 items", async () => {
+    const store = createEditorStore(blankDocument(), "t");
+    store.getState().addCard("iconRow");
+    const id = store.getState().doc.cards[0].id;
+    store.getState().updateCard(id, (c) => {
+      if (c.type === "iconRow") {
+        while (c.content.items.length < 12) c.content.items.push({ icon: { kind: "emoji", value: "✨" } });
+      }
+    });
+    render(
+      <EditorStoreContext.Provider value={store}>
+        <Inspector />
+      </EditorStoreContext.Provider>
+    );
+    const addButton = screen.getByRole("button", { name: /\+ add item/i });
+    expect(addButton).toBeDisabled();
+    await userEvent.click(addButton);
+    const card = store.getState().doc.cards[0];
+    expect(card.type === "iconRow" && card.content.items).toHaveLength(12);
+  });
 });

@@ -83,7 +83,7 @@ export const cardSchema = z.discriminatedUnion("type", [
     items: z.array(z.object({
       icon: iconSourceSchema,
       label: richTextSchema.optional(),
-    })).min(1),
+    })).min(1).max(12),
     caption: richTextSchema.optional(),
   }) }),
 ]);

@@ -163,9 +163,9 @@ export function Inspector() {
               })}
             </div>
           ))}
-          <button onClick={() => updateCard(card.id, (c) => {
+          <button disabled={card.content.items.length >= 12} onClick={() => updateCard(card.id, (c) => {
             if (c.type === "iconRow") c.content.items.push({ icon: { kind: "emoji", value: "✨" } });
-          })} className="mb-2 rounded border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-800">
+          })} className="mb-2 rounded border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed">
             + Add item
           </button>
           {rt("Group caption (optional)", card.content.caption ?? { text: "" },
