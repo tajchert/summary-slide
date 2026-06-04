@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useEditor, useEditorStore } from "./EditorContext";
 import { quickExport } from "./quickExport";
+import { saveSlide } from "../lib/api";
 
 export function TopBar() {
   const title = useEditor((s) => s.doc.title);
@@ -20,6 +21,7 @@ export function TopBar() {
   const canRedo = useEditor((s) => s.future.length > 0);
   const store = useEditorStore();
   const [exporting, setExporting] = useState(false);
+  const [shareState, setShareState] = useState<"idle" | "saving" | "copied" | "error">("idle");
 
   const btn = "rounded-md border border-neutral-700 px-3 py-1 text-sm hover:bg-neutral-800 disabled:opacity-40";
 
@@ -50,7 +52,25 @@ export function TopBar() {
       <button className={`${btn} border-blue-700 bg-blue-600 hover:bg-blue-500`} disabled data-action="hq-export">
         HQ Export
       </button>
-      <button className={btn} disabled data-action="share">Share</button>
+      <button
+        className={btn}
+        data-action="share"
+        disabled={shareState === "saving"}
+        onClick={async () => {
+          setShareState("saving");
+          try {
+            const id = await saveSlide(store.getState().doc);
+            await navigator.clipboard.writeText(`${location.origin}/s/${id}`);
+            setShareState("copied");
+            setTimeout(() => setShareState("idle"), 2000);
+          } catch {
+            setShareState("error");
+            setTimeout(() => setShareState("idle"), 3000);
+          }
+        }}
+      >
+        {shareState === "copied" ? "Link copied!" : shareState === "error" ? "Failed — retry" : "Share"}
+      </button>
     </div>
   );
 }
