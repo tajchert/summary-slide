@@ -67,3 +67,44 @@ describe("slides API", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("upload API", () => {
+  const png = () => {
+    // minimal PNG magic bytes + padding
+    const bytes = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
+    return new Blob([bytes], { type: "image/png" });
+  };
+
+  it("uploads a PNG and serves it back via /i/:key", async () => {
+    const form = new FormData();
+    form.append("file", png(), "photo.png");
+    const up = await request("/api/upload", { method: "POST", body: form });
+    expect(up.status).toBe(201);
+    const { url } = await up.json() as { url: string };
+    expect(url).toMatch(/^\/i\/images\/[a-f0-9]{16}\.png$/);
+
+    const img = await request(url);
+    expect(img.status).toBe(200);
+    expect(img.headers.get("content-type")).toBe("image/png");
+    expect(img.headers.get("cache-control")).toContain("immutable");
+  });
+
+  it("rejects disallowed content types", async () => {
+    const form = new FormData();
+    form.append("file", new Blob([new Uint8Array(4)], { type: "image/svg+xml" }), "x.svg");
+    const res = await request("/api/upload", { method: "POST", body: form });
+    expect(res.status).toBe(415);
+  });
+
+  it("rejects files over 10MB", async () => {
+    const form = new FormData();
+    form.append("file", new Blob([new Uint8Array(10 * 1024 * 1024 + 1)], { type: "image/png" }), "big.png");
+    const res = await request("/api/upload", { method: "POST", body: form });
+    expect(res.status).toBe(413);
+  });
+
+  it("404s for missing image keys", async () => {
+    const res = await request("/i/images/0000000000000000.png");
+    expect(res.status).toBe(404);
+  });
+});
