@@ -29,8 +29,11 @@ The editor (`src/editor/EditorCanvas.tsx`) is the one place with a second layout
 ```
 src/schema/slide.ts          THE contract: zod schema + types, shared verbatim by SPA and worker.
                              gridSchema refines x+w≤12, y+h≤6. blankDocument() defaults.
-src/render/styleResolve.ts   theme→card→field style cascade; SLIDE_FONT_FAMILY (see invariants)
-src/render/CardView.tsx      dispatch card.type → six components in src/render/cards/
+src/render/styleResolve.ts   theme→card→field style cascade; SLIDE_FONT_FAMILY +
+                             SLIDE_MONO_FONT_FAMILY (see invariants)
+src/render/CardView.tsx      dispatch card.type → nine components in src/render/cards/:
+                             stat, headline, image, icon, hero, list, iconRow, statGroup, code
+src/render/codeHighlight.tsx sync Prism tokenize → inline-styled spans (see invariant #10)
 src/render/SlideRenderer.tsx the single render path (CSS grid, data-slide-root)
 src/editor/store.ts          zustand vanilla store factory: commit() = snapshot to past[] +
                              structuredClone + 300ms-debounced localStorage persist; undo/redo
@@ -39,7 +42,9 @@ src/editor/EditorCanvas.tsx  RGL wrapper; commitText() walks "content.items.2"-s
                              (defensively — stale paths are no-ops)
 src/editor/Inspector.tsx     per-type content controls; no-selection = slide settings
 src/editor/quickExport.ts    html-to-image capture (see gotcha #1)
-src/templates/index.ts       built-in templates = plain SlideDocuments
+src/templates/index.ts       built-in templates = plain SlideDocuments; templates.test.ts
+                             enforces schema-validity, no overlaps, override⇒textColor, and
+                             that the set showcases every new card capability
 src/lib/{storage,api}.ts     localStorage docs/recents; fetch wrappers
 worker/index.ts              Hono app + Env bindings + per-IP rate limit on /api/* POSTs
 worker/{slides,upload,exportRoute}.ts  D1 share storage / R2 uploads / Browser Rendering export
@@ -50,7 +55,7 @@ wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER
 ## Invariants & hard-won gotchas
 
 1. **Quick PNG capture node must be style-clean.** html-to-image clones the target node *with* its inline styles; capturing a node that carries `position:fixed;left:-100000px` renders everything outside the canvas → black PNG. The off-screen positioning lives on an outer wrapper; `toPng` gets the clean inner node. The e2e guards this by decoding the download and counting bright pixels.
-2. **`SLIDE_FONT_FAMILY` (styleResolve.ts) is the only font stack** for slide content, and emoji families come **before** `system-ui` — Linux/headless Chromium's DejaVu owns a monochrome U+26A1 (⚡) that shadows Noto Color Emoji otherwise.
+2. **`SLIDE_FONT_FAMILY` / `SLIDE_MONO_FONT_FAMILY` (styleResolve.ts) are the only font stacks** for slide content, and in both, emoji families come **before** the generic fallback (`system-ui` / `monospace`) — Linux/headless Chromium's DejaVu owns a monochrome U+26A1 (⚡) that shadows Noto Color Emoji otherwise.
 3. **Card `style.background` overrides must ship a `textColor`.** Theme switching keeps overrides; a dark override without explicit text color becomes unreadable in light mode. Template authoring rule, enforced by review not schema.
 4. **Default `gap` is 24 because (1920−13g)/12 must be an integer** — fractional grid tracks break pixel-identical exports across engines.
 5. **Inline editing is context-injected, not forked.** `RichText` renders plain text unless `InlineEditContext` + `InlineEditCardContext` + `editPath` are all present (only the editor provides them). The display span carries class `editable-text` = RGL's `draggableCancel`, so dblclick isn't swallowed by drag. Tradeoff: drags start from card padding, not text.
@@ -58,12 +63,14 @@ wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER
 7. **Version pins that look wrong but aren't:** React 18 (react-grid-layout 1.5 peer limit), `@cloudflare/vitest-pool-workers@0.12.21 exact` (last vitest-3-compatible line; newer requires vitest 4), `react() as never` in vitest.config.ts (vite 8 vs vitest-bundled-vite type skew).
 8. **Worker quirks:** `@cloudflare/puppeteer` is dynamically imported inside the export handler (module-scope import breaks the test pool). R2 image serving buffers via `arrayBuffer()` (test pool can't stream R2 bodies; objects are ≤10MB anyway). `slides.ts` size cap counts bytes via TextEncoder, not string length.
 9. **Test environment:** jsdom lacks `isContentEditable` (polyfilled in `src/test-setup.ts`) and `ResizeObserver` (guarded at use sites). `afterEach(cleanup)` is explicit — auto-cleanup didn't fire.
+10. **Code highlighting must stay synchronous.** The export waits for `data-render-ready` (fonts+images only); `codeHighlight.tsx` uses Prism's sync `tokenize` → React spans with **inline colors** (no Prism CSS theme), so all render paths stay pixel-identical with zero readiness plumbing. Swapping in an async highlighter (Shiki) would race the export gate and Quick PNG capture.
 
 ## Practices
 
 - TDD: failing test first, then implementation (worker routes and pure helpers especially).
 - Schema changes: bump carefully — `version: z.literal(1)` is the migration hook; localStorage docs failing zod show "started fresh", shared D1 docs are validated on POST.
 - New card type checklist: schema union member → component in `src/render/cards/` → CardView dispatch → `newCard.ts` default → `defaultSpan()` → palette tile → Inspector section → CardView.test case.
+- Item-array cards (list-like content) get a zod `.min(1).max(N)` bound plus a disabled-at-cap "+ Add" button — unbounded items silently clip in non-wrapping flex rows (iconRow ≤12, statGroup ≤6).
 - Adding POST endpoints: they're automatically rate-limited by the `/api/*` middleware; keep zod validation at the boundary like `slides.ts`.
 - Deploy: push to master (CI: test → build → test:worker → typecheck → wrangler deploy) or `npx wrangler deploy`.
 
