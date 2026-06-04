@@ -26,7 +26,7 @@ export function Inspector() {
         <NumberInput label="Card radius" value={doc.theme.cardStyle.radius}
           onChange={(radius) => setTheme({ cardStyle: { ...doc.theme.cardStyle, radius: radius ?? 24 } })} />
         <NumberInput label="Card gap" value={doc.theme.cardStyle.gap}
-          onChange={(gap) => setTheme({ cardStyle: { ...doc.theme.cardStyle, gap: gap ?? 16 } })} />
+          onChange={(gap) => setTheme({ cardStyle: { ...doc.theme.cardStyle, gap: gap ?? 24 } })} />
       </div>
     );
   }
