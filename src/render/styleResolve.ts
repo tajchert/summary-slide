@@ -1,6 +1,15 @@
 import type { CSSProperties } from "react";
 import type { Background, Card, RichText, SlideDocument } from "../schema/slide";
 
+/**
+ * Single font stack for everything slide-rendered (editor canvas, share preview,
+ * both export paths) — keeping these identical is part of the pixel-fidelity
+ * guarantee. Emoji families are listed explicitly so emoji like ⚡ pick a color
+ * emoji font instead of a monochrome symbol glyph (matters in headless Chromium).
+ */
+export const SLIDE_FONT_FAMILY =
+  '"Inter Variable", system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+
 export interface ThemeTokens {
   cardBg: string;
   text: string;

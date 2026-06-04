@@ -1,3 +1,4 @@
+import { readFileSync, statSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 
 test("create from template, edit text, quick-export a PNG", async ({ page }) => {
@@ -29,6 +30,26 @@ test("create from template, edit text, quick-export a PNG", async ({ page }) => 
   expect(download.suggestedFilename()).toMatch(/\.png$/);
   const path = await download.path();
   expect(path).toBeTruthy();
+  expect(statSync(path!).size).toBeGreaterThan(10_000);
+
+  // The export must contain actual rendered content, not a uniform fill.
+  // Downsample in-browser and count bright pixels (white text, light cards).
+  const brightPixels = await page.evaluate(async (b64) => {
+    const img = new Image();
+    img.src = "data:image/png;base64," + b64;
+    await img.decode();
+    const c = document.createElement("canvas");
+    c.width = 192; c.height = 108;
+    const ctx = c.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, 192, 108);
+    const d = ctx.getImageData(0, 0, 192, 108).data;
+    let bright = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i] + d[i + 1] + d[i + 2] > 150) bright++;
+    }
+    return bright;
+  }, readFileSync(path!).toString("base64"));
+  expect(brightPixels).toBeGreaterThan(100);
 });
 
 test("undo reverses an edit", async ({ page }) => {

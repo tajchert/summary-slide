@@ -14,7 +14,7 @@ export function kitchenSinkDocument(): SlideDocument {
       content: { src: "", fit: "cover",
         overlay: { text: { text: "Video Boost" }, placement: "center-pill" } } },
     { id: "icon1", type: "icon", grid: { x: 9, y: 0, w: 3, h: 2 },
-      style: { background: { type: "solid", color: "#2c2c2e" } },
+      style: { background: { type: "solid", color: "#2c2c2e" }, textColor: "#ffffff" },
       content: { icon: { kind: "emoji", value: "📞" }, label: { text: "Phone" }, layout: "left" } },
     { id: "hero1", type: "hero", grid: { x: 2, y: 1, w: 4, h: 4 },
       style: { background: { type: "gradient", from: "#1a2980", to: "#26d0ce", angle: 135 } },

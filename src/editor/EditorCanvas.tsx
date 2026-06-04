@@ -2,7 +2,7 @@ import { useMemo, useRef } from "react";
 import GridLayout from "react-grid-layout";
 import type ReactGridLayout from "react-grid-layout";
 import { GRID_COLS, GRID_ROWS } from "../schema/slide";
-import { backgroundToCss } from "../render/styleResolve";
+import { backgroundToCss, SLIDE_FONT_FAMILY } from "../render/styleResolve";
 import { CardView } from "../render/CardView";
 import { useEditor, InlineEditContext, InlineEditCardContext } from "./EditorContext";
 
@@ -97,13 +97,15 @@ export function EditorCanvas() {
             key={card.id}
             className={card.id === selectedCardId ? "slide-card-selected" : undefined}
             onMouseDownCapture={() => selectCard(card.id)}
+            // match the card's on-screen corner radius so the selection outline hugs it
+            style={{ borderRadius: doc.theme.cardStyle.radius * scale }}
           >
             {/* Render content at full 1920-canvas scale, shrink visually */}
             <div style={{
               width: `calc(100% / ${scale})`,
               height: `calc(100% / ${scale})`,
               transform: `scale(${scale})`, transformOrigin: "top left",
-              fontFamily: '"Inter Variable", system-ui, sans-serif',
+              fontFamily: SLIDE_FONT_FAMILY,
             }}>
               <InlineEditContext.Provider value={commitText}>
                 <InlineEditCardContext.Provider value={card.id}>

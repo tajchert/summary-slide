@@ -7,11 +7,17 @@ import { SlideRenderer } from "../render/SlideRenderer";
 
 /** Render doc off-screen at full canvas size and download a PNG at the given pixelRatio. */
 export async function quickExport(doc: SlideDocument, pixelRatio: 2 | 3 = 2): Promise<void> {
+  // Two layers: the OUTER carries the off-screen positioning (display:none breaks
+  // html-to-image, so it must stay rendered); the INNER is style-clean and is what
+  // we capture. html-to-image clones the target node WITH its inline styles — capturing
+  // a node that itself has position:fixed;left:-100000px lays the clone out 100,000px
+  // outside the canvas and yields a blank/black PNG.
+  const outer = document.createElement("div");
+  outer.setAttribute("data-export-mount", "");
+  outer.style.cssText = "position:fixed;left:-100000px;top:0;";
   const mount = document.createElement("div");
-  mount.setAttribute("data-export-mount", "");
-  // off-screen but rendered (display:none breaks html-to-image)
-  mount.style.cssText = "position:fixed;left:-100000px;top:0;";
-  document.body.appendChild(mount);
+  outer.appendChild(mount);
+  document.body.appendChild(outer);
   const root = createRoot(mount);
   try {
     flushSync(() => {
@@ -31,7 +37,7 @@ export async function quickExport(doc: SlideDocument, pixelRatio: 2 | 3 = 2): Pr
     a.download = `${safeTitle}.png`;
     a.click();
   } finally {
-    mount.remove();
+    outer.remove();
     // Unmount in a macrotask: callers (and tests) may inspect the rendered tree
     // synchronously right after resolution; React 18 unmount() clears it eagerly.
     setTimeout(() => root.unmount(), 0);

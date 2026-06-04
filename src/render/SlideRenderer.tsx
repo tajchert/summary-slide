@@ -1,6 +1,6 @@
 import type { SlideDocument } from "../schema/slide";
 import { GRID_COLS, GRID_ROWS } from "../schema/slide";
-import { backgroundToCss } from "./styleResolve";
+import { backgroundToCss, SLIDE_FONT_FAMILY } from "./styleResolve";
 import { CardView } from "./CardView";
 
 interface Props {
@@ -25,7 +25,7 @@ export function SlideRenderer({ doc, scale }: Props) {
         gap,
         padding: gap,
         boxSizing: "border-box",
-        fontFamily: '"Inter Variable", system-ui, -apple-system, sans-serif',
+        fontFamily: SLIDE_FONT_FAMILY,
         ...(scale !== undefined ? { transform: `scale(${scale})`, transformOrigin: "top left" } : {}),
       }}
     >

@@ -10,4 +10,6 @@
 
 /* Editor-only affordances */
 .react-grid-item > .react-resizable-handle { z-index: 20; }
-.slide-card-selected { outline: 2px solid #0a84ff; outline-offset: 2px; border-radius: 24px; }
+/* border-radius comes inline from EditorCanvas (theme radius × canvas scale) so the
+   outline hugs the card's actual corner shape; the offset is the visible margin. */
+.slide-card-selected { outline: 2px solid #0a84ff; outline-offset: 3px; }
