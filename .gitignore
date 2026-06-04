@@ -13,3 +13,4 @@ playwright/.cache/
 .vscode/*
 !.vscode/extensions.json
 .idea
+examples/
