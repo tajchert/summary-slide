@@ -9,7 +9,13 @@
 @import "react-resizable/css/styles.css";
 
 /* Editor-only affordances */
-.react-grid-item > .react-resizable-handle { z-index: 20; }
+.react-grid-item > .react-resizable-handle {
+  z-index: 20;
+  /* Stock react-resizable arrow is black @30% opacity — invisible on dark cards.
+     Same corner-bracket glyph in selection blue with a white outline (paint-order
+     puts the stroke beneath the fill), visible on any card background. */
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 6" width="6" height="6"%3E%3Cpath d="M 6 6 L 0 6 L 0 4.2 L 4 4.2 L 4.2 4.2 L 4.2 0 L 6 0 Z" fill="%230a84ff" stroke="%23ffffff" stroke-width="0.6" stroke-linejoin="round" paint-order="stroke"/%3E%3C/svg%3E');
+}
 /* border-radius comes inline from EditorCanvas (theme radius × canvas scale) so the
    outline hugs the card's actual corner shape; the offset is the visible margin. */
 .slide-card-selected { outline: 2px solid #0a84ff; outline-offset: 3px; }
