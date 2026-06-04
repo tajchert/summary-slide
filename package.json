@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
+    "@testing-library/dom": "^10.4.1",
     "hono": "^4.12.23",
     "html-to-image": "^1.11.13",
     "nanoid": "^5.1.11",

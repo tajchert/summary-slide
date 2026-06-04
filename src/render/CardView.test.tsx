@@ -1,0 +1,74 @@
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { CardView } from "./CardView";
+import { blankDocument } from "../schema/slide";
+import type { Card } from "../schema/slide";
+
+const theme = blankDocument().theme;
+const base = { id: "c1", grid: { x: 0, y: 0, w: 2, h: 2 } };
+
+const renderCard = (card: Card) => render(<CardView card={card} theme={theme} />);
+
+describe("CardView", () => {
+  it("stat renders prefix, value and caption", () => {
+    renderCard({ ...base, type: "stat", content: {
+      prefix: { text: "Up to" }, value: { text: "48MP" }, caption: { text: "Fusion camera" } } });
+    expect(screen.getByText("Up to")).toBeInTheDocument();
+    expect(screen.getByText("48MP")).toBeInTheDocument();
+    expect(screen.getByText("Fusion camera")).toBeInTheDocument();
+  });
+
+  it("headline renders text with gradient style", () => {
+    renderCard({ ...base, type: "headline", content: {
+      text: { text: "Spotlight actions", gradient: { from: "#f55", to: "#5af", angle: 90 } } } });
+    const el = screen.getByText("Spotlight actions");
+    expect(el).toHaveStyle({ backgroundImage: "linear-gradient(90deg, #f55, #5af)" });
+  });
+
+  it("image renders img with object-fit and overlay text", () => {
+    renderCard({ ...base, type: "image", content: {
+      src: "/i/x.png", fit: "contain", overlay: { text: { text: "Video Boost" }, placement: "center-pill" } } });
+    const img = screen.getByRole("img");
+    expect(img).toHaveAttribute("src", "/i/x.png");
+    expect(img).toHaveStyle({ objectFit: "contain" });
+    expect(screen.getByText("Video Boost")).toBeInTheDocument();
+  });
+
+  it("icon renders emoji and label; layout=left renders a row", () => {
+    const { container } = renderCard({ ...base, type: "icon", content: {
+      icon: { kind: "emoji", value: "📞" }, label: { text: "Phone" }, layout: "left" } });
+    expect(screen.getByText("📞")).toBeInTheDocument();
+    expect(screen.getByText("Phone")).toBeInTheDocument();
+    expect((container.firstChild!.firstChild as HTMLElement).style.flexDirection).toBe("row");
+  });
+
+  it("icon renders uploaded graphic instead of emoji", () => {
+    renderCard({ ...base, type: "icon", content: {
+      icon: { kind: "image", src: "/i/logo.png" }, label: { text: "Brand" }, layout: "top" } });
+    expect(screen.getByRole("img")).toHaveAttribute("src", "/i/logo.png");
+  });
+
+  it("hero renders title over optional image", () => {
+    renderCard({ ...base, type: "hero", content: {
+      title: { text: "macOS" }, image: "/i/bg.png", imagePlacement: "behind" } });
+    expect(screen.getByText("macOS")).toBeInTheDocument();
+    expect(screen.getByRole("img")).toHaveAttribute("src", "/i/bg.png");
+  });
+
+  it("list renders title and items with bullets", () => {
+    renderCard({ ...base, type: "list", content: {
+      title: { text: "Smart experiences" }, marker: "bullet",
+      items: [{ text: "Wi-Fi 7" }, { text: "Lossless audio" }] } });
+    expect(screen.getByText("Smart experiences")).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  it("applies card style override on the wrapper", () => {
+    const { container } = renderCard({ ...base, type: "headline",
+      style: { background: { type: "solid", color: "#ff0000" }, textColor: "#00ff00" },
+      content: { text: { text: "x" } } });
+    const wrapper = container.firstChild as HTMLElement;
+    expect(wrapper.style.background).toContain("rgb(255, 0, 0)");
+    expect(wrapper.style.color).toBe("rgb(0, 255, 0)");
+  });
+});
