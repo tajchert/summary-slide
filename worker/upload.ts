@@ -33,6 +33,8 @@ images.get("/*", async (c) => {
   const key = c.req.path.replace(/^\/i\//, "");
   const obj = await c.env.BUCKET.get(key);
   if (!obj) return c.json({ error: "Not found" }, 404);
+  // Buffer instead of streaming obj.body: vitest-pool-workers' isolated storage can't
+  // stream R2 bodies across the test boundary, and objects are capped at 10MB anyway.
   const bytes = await obj.arrayBuffer();
   return c.body(bytes, 200, {
     "content-type": obj.httpMetadata?.contentType ?? "application/octet-stream",
