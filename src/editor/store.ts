@@ -24,13 +24,14 @@ export interface EditorState {
   redo: () => void;
 }
 
-let saveTimer: ReturnType<typeof setTimeout> | undefined;
-function persistDebounced(localId: string, doc: SlideDocument) {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => saveDoc(localId, doc), 300);
-}
-
 export function createEditorStore(initial: SlideDocument, localId: string) {
+  // Per-store debounce timer so multiple stores (tests, future multi-editor) don't cancel each other.
+  let saveTimer: ReturnType<typeof setTimeout> | undefined;
+  const persistDebounced = (id: string, doc: SlideDocument) => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => saveDoc(id, doc), 300);
+  };
+
   return createStore<EditorState>()((set, get) => {
     /** Record current doc into history, then apply producer to a deep copy. */
     const commit = (produce: (doc: SlideDocument) => void) => {
@@ -78,21 +79,32 @@ export function createEditorStore(initial: SlideDocument, localId: string) {
 
       setTheme: (patch) => commit((doc) => { Object.assign(doc.theme, patch); }),
       setTitle: (title) => commit((doc) => { doc.title = title; }),
-      setDoc: (doc) => commit((d) => { Object.assign(d, structuredClone(doc)); }),
+      setDoc: (doc) => commit((d) => { Object.assign(d, doc); }),
 
       undo: () => {
-        const { past, doc, future } = get();
+        const { past, doc, future, selectedCardId } = get();
         if (past.length === 0) return;
         const prev = past[past.length - 1];
-        set({ doc: prev, past: past.slice(0, -1), future: [doc, ...future] });
+        set({
+          doc: prev,
+          past: past.slice(0, -1),
+          future: [doc, ...future],
+          // drop selection if the restored doc no longer contains the card
+          selectedCardId: prev.cards.some((c) => c.id === selectedCardId) ? selectedCardId : null,
+        });
         persistDebounced(get().localId, prev);
       },
 
       redo: () => {
-        const { past, doc, future } = get();
+        const { past, doc, future, selectedCardId } = get();
         if (future.length === 0) return;
         const next = future[0];
-        set({ doc: next, past: [...past, doc], future: future.slice(1) });
+        set({
+          doc: next,
+          past: [...past, doc],
+          future: future.slice(1),
+          selectedCardId: next.cards.some((c) => c.id === selectedCardId) ? selectedCardId : null,
+        });
         persistDebounced(get().localId, next);
       },
     };

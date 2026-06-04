@@ -54,6 +54,13 @@ describe("editor store", () => {
     expect(store.getState().doc.cards).toHaveLength(1);
   });
 
+  it("undo clears selection when the selected card no longer exists", () => {
+    store.getState().addCard("stat");
+    expect(store.getState().selectedCardId).not.toBeNull();
+    store.getState().undo();
+    expect(store.getState().selectedCardId).toBeNull();
+  });
+
   it("undo with empty history is a no-op", () => {
     expect(() => store.getState().undo()).not.toThrow();
     expect(store.getState().doc.cards).toHaveLength(0);

@@ -7,10 +7,14 @@ const RECENTS_KEY = "summary-slide:recents";
 export interface RecentEntry { localId: string; title: string; updatedAt: number }
 
 export function saveDoc(localId: string, doc: SlideDocument): void {
-  localStorage.setItem(DOC_PREFIX + localId, JSON.stringify(doc));
-  const recents = listRecents().filter((r) => r.localId !== localId);
-  recents.unshift({ localId, title: doc.title, updatedAt: Date.now() });
-  localStorage.setItem(RECENTS_KEY, JSON.stringify(recents.slice(0, 20)));
+  try {
+    localStorage.setItem(DOC_PREFIX + localId, JSON.stringify(doc));
+    const recents = listRecents().filter((r) => r.localId !== localId);
+    recents.unshift({ localId, title: doc.title, updatedAt: Date.now() });
+    localStorage.setItem(RECENTS_KEY, JSON.stringify(recents.slice(0, 20)));
+  } catch {
+    // QuotaExceededError / private-browsing — skip persist rather than crash a timer callback
+  }
 }
 
 /** Returns null for missing or corrupt/outdated docs (caller offers "start fresh"). */
