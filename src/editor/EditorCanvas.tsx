@@ -5,6 +5,7 @@ import { GRID_COLS, GRID_ROWS } from "../schema/slide";
 import { backgroundToCss, SLIDE_FONT_FAMILY } from "../render/styleResolve";
 import { CardView } from "../render/CardView";
 import { useEditor, InlineEditContext, InlineEditCardContext } from "./EditorContext";
+import { availableResizeHandles } from "./gridUtils";
 
 const DISPLAY_WIDTH = 960; // px; canvas is scaled-down 1920x1080
 
@@ -40,7 +41,14 @@ export function EditorCanvas() {
   const rowHeight = (displayHeight - 2 * gap - (GRID_ROWS - 1) * gap) / GRID_ROWS;
 
   const layout: ReactGridLayout.Layout[] = useMemo(
-    () => doc.cards.map((c) => ({ i: c.id, x: c.grid.x, y: c.grid.y, w: c.grid.w, h: c.grid.h })),
+    () => doc.cards.map((c) => ({
+      i: c.id, x: c.grid.x, y: c.grid.y, w: c.grid.w, h: c.grid.h,
+      // only offer resize arrows toward free space (+ shrink fallbacks)
+      resizeHandles: availableResizeHandles(
+        c.grid,
+        doc.cards.filter((o) => o.id !== c.id).map((o) => o.grid)
+      ),
+    })),
     [doc.cards]
   );
 
@@ -89,7 +97,6 @@ export function EditorCanvas() {
         layout={layout}
         onLayoutChange={onLayoutChange}
         draggableCancel=".editable-text"
-        resizeHandles={["se", "e", "s"]}
         style={{ height: displayHeight }}
       >
         {doc.cards.map((card) => (
