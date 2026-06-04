@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "summary-slide",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-05-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/i/*"]
+  },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "summary-slide",
+    "database_id": "REPLACE-AFTER-D1-CREATE",
+    "migrations_dir": "migrations"
+  }],
+  "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "summary-slide" }],
+  "browser": { "binding": "BROWSER" },
+  "observability": { "enabled": true }
+}

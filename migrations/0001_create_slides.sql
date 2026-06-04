@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS slides (
+  id TEXT PRIMARY KEY,
+  doc TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
