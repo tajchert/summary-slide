@@ -5,8 +5,9 @@ import { Inspector } from "./Inspector";
 import { EditorStoreContext } from "./EditorContext";
 import { createEditorStore } from "./store";
 import { blankDocument } from "../schema/slide";
+import type { CardType } from "../schema/slide";
 
-function setup(addType?: "stat" | "headline") {
+function setup(addType?: CardType) {
   const store = createEditorStore(blankDocument(), "t");
   if (addType) store.getState().addCard(addType);
   render(
@@ -54,5 +55,31 @@ describe("Inspector", () => {
     const store = setup("headline");
     await userEvent.click(screen.getByRole("button", { name: /delete card/i }));
     expect(store.getState().doc.cards).toHaveLength(0);
+  });
+
+  it("iconRow: edits item label, adds and removes items", async () => {
+    const store = setup("iconRow");
+    const input = screen.getByLabelText(/label \(optional\) 1/i);
+    await userEvent.clear(input);
+    await userEvent.type(input, "MagSafe");
+    let card = store.getState().doc.cards[0];
+    expect(card.type === "iconRow" && card.content.items[0].label?.text).toBe("MagSafe");
+
+    await userEvent.click(screen.getByRole("button", { name: /\+ add item/i }));
+    card = store.getState().doc.cards[0];
+    expect(card.type === "iconRow" && card.content.items).toHaveLength(3);
+
+    await userEvent.click(screen.getByRole("button", { name: /remove item 1/i }));
+    card = store.getState().doc.cards[0];
+    expect(card.type === "iconRow" && card.content.items).toHaveLength(2);
+  });
+
+  it("iconRow: hides remove button on the last item", async () => {
+    const store = setup("iconRow");
+    // default card has 2 items: remove one, then the remove button disappears
+    await userEvent.click(screen.getByRole("button", { name: /remove item 2/i }));
+    const card = store.getState().doc.cards[0];
+    expect(card.type === "iconRow" && card.content.items).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: /remove item/i })).not.toBeInTheDocument();
   });
 });

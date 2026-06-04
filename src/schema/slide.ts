@@ -31,6 +31,12 @@ export const gridSchema = z.object({
   .refine((g) => g.y + g.h <= GRID_ROWS, { message: "card overflows grid rows" });
 export type GridRect = z.infer<typeof gridSchema>;
 
+export const iconSourceSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("emoji"), value: z.string() }),
+  z.object({ kind: z.literal("image"), src: z.string() }),
+]);
+export type IconSource = z.infer<typeof iconSourceSchema>;
+
 const cardBase = {
   id: z.string().min(1),
   grid: gridSchema,
@@ -59,10 +65,7 @@ export const cardSchema = z.discriminatedUnion("type", [
     }).optional(),
   }) }),
   z.object({ ...cardBase, type: z.literal("icon"), content: z.object({
-    icon: z.discriminatedUnion("kind", [
-      z.object({ kind: z.literal("emoji"), value: z.string() }),
-      z.object({ kind: z.literal("image"), src: z.string() }),
-    ]),
+    icon: iconSourceSchema,
     label: richTextSchema,
     layout: z.enum(["top", "left", "right"]),
   }) }),
@@ -75,6 +78,13 @@ export const cardSchema = z.discriminatedUnion("type", [
     title: richTextSchema,
     items: z.array(richTextSchema),
     marker: z.enum(["bullet", "none"]),
+  }) }),
+  z.object({ ...cardBase, type: z.literal("iconRow"), content: z.object({
+    items: z.array(z.object({
+      icon: iconSourceSchema,
+      label: richTextSchema.optional(),
+    })).min(1),
+    caption: richTextSchema.optional(),
   }) }),
 ]);
 export type Card = z.infer<typeof cardSchema>;

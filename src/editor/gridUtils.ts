@@ -25,5 +25,6 @@ export function defaultSpan(type: CardType): { w: number; h: number } {
     case "icon": return { w: 2, h: 2 };
     case "hero": return { w: 4, h: 4 };
     case "list": return { w: 3, h: 3 };
+    case "iconRow": return { w: 4, h: 1 };
   }
 }

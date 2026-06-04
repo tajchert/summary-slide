@@ -124,6 +124,55 @@ export function Inspector() {
         </>
       )}
 
+      {card.type === "iconRow" && (
+        <>
+          {card.content.items.map((item, i) => (
+            <div key={i} className="mb-2 rounded border border-neutral-800 p-2">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs text-neutral-400">Item {i + 1}</span>
+                {card.content.items.length > 1 && (
+                  <button aria-label={`Remove item ${i + 1}`}
+                    onClick={() => updateCard(card.id, (c) => {
+                      if (c.type === "iconRow") c.content.items.splice(i, 1);
+                    })}
+                    className="text-neutral-500 hover:text-red-400">✕</button>
+                )}
+              </div>
+              <SelectInput label={`Icon kind ${i + 1}`} value={item.icon.kind}
+                options={["emoji", "image"] as const}
+                onChange={(kind) => updateCard(card.id, (c) => {
+                  if (c.type === "iconRow" && c.content.items[i]) c.content.items[i].icon =
+                    kind === "emoji" ? { kind: "emoji", value: "✨" } : { kind: "image", src: "" };
+                })} />
+              {item.icon.kind === "emoji" ? (
+                <TextInput label={`Emoji / text ${i + 1}`} value={item.icon.value}
+                  onChange={(value) => updateCard(card.id, (c) => {
+                    const icon = c.type === "iconRow" ? c.content.items[i]?.icon : undefined;
+                    if (icon?.kind === "emoji") icon.value = value;
+                  })} />
+              ) : (
+                <ImageUploadField label={`Graphic ${i + 1}`} value={item.icon.src}
+                  onChange={(src) => updateCard(card.id, (c) => {
+                    const icon = c.type === "iconRow" ? c.content.items[i]?.icon : undefined;
+                    if (icon?.kind === "image") icon.src = src;
+                  })} />
+              )}
+              {rt(`Label (optional) ${i + 1}`, item.label ?? { text: "" }, (c, v) => {
+                if (c.type === "iconRow" && c.content.items[i])
+                  c.content.items[i].label = v.text ? v : undefined;
+              })}
+            </div>
+          ))}
+          <button onClick={() => updateCard(card.id, (c) => {
+            if (c.type === "iconRow") c.content.items.push({ icon: { kind: "emoji", value: "✨" } });
+          })} className="mb-2 rounded border border-neutral-700 px-2 py-1 text-xs hover:bg-neutral-800">
+            + Add item
+          </button>
+          {rt("Group caption (optional)", card.content.caption ?? { text: "" },
+            (c, v) => { if (c.type === "iconRow") c.content.caption = v.text ? v : undefined; })}
+        </>
+      )}
+
       {card.type === "list" && (
         <>
           {rt("Title", card.content.title, (c, v) => { if (c.type === "list") c.content.title = v; })}

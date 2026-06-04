@@ -21,6 +21,11 @@ describe("slideDocumentSchema", () => {
         content: { title: { text: "macOS" } } },
       { id: "f", type: "list", grid: { x: 6, y: 2, w: 3, h: 2 },
         content: { title: { text: "More" }, items: [{ text: "Wi-Fi 7" }], marker: "bullet" } },
+      { id: "g", type: "iconRow", grid: { x: 9, y: 1, w: 3, h: 1 },
+        content: { items: [
+          { icon: { kind: "emoji", value: "📷" }, label: { text: "0.5x" } },
+          { icon: { kind: "image", src: "/i/port.png" } },
+        ], caption: { text: "Four lenses in your pocket" } } },
     ];
     const res = slideDocumentSchema.safeParse(doc);
     expect(res.success).toBe(true);
@@ -46,6 +51,13 @@ describe("slideDocumentSchema", () => {
   it("rejects unknown card types", () => {
     const doc = blankDocument();
     doc.cards = [{ id: "a", type: "video", grid: { x: 0, y: 0, w: 1, h: 1 }, content: {} } as never];
+    expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+  });
+
+  it("rejects an iconRow with zero items", () => {
+    const doc = blankDocument();
+    doc.cards = [{ id: "a", type: "iconRow", grid: { x: 0, y: 0, w: 3, h: 1 },
+      content: { items: [] } } as never];
     expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
   });
 

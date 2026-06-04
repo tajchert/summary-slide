@@ -63,6 +63,28 @@ describe("CardView", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
 
+  it("iconRow renders all items with labels and a group caption", () => {
+    renderCard({ ...base, type: "iconRow", content: {
+      items: [
+        { icon: { kind: "emoji", value: "🔌" }, label: { text: "MagSafe 3" } },
+        { icon: { kind: "image", src: "/i/hdmi.png" }, label: { text: "HDMI" } },
+        { icon: { kind: "emoji", value: "💾" } },
+      ],
+      caption: { text: "Connect everything" } } });
+    expect(screen.getByText("🔌")).toBeInTheDocument();
+    expect(screen.getByText("MagSafe 3")).toBeInTheDocument();
+    expect(screen.getByRole("img")).toHaveAttribute("src", "/i/hdmi.png");
+    expect(screen.getByText("HDMI")).toBeInTheDocument();
+    expect(screen.getByText("💾")).toBeInTheDocument();
+    expect(screen.getByText("Connect everything")).toBeInTheDocument();
+  });
+
+  it("iconRow without labels or caption renders only icons", () => {
+    renderCard({ ...base, type: "iconRow", content: {
+      items: [{ icon: { kind: "emoji", value: "⚡" } }] } });
+    expect(screen.getByText("⚡")).toBeInTheDocument();
+  });
+
   it("applies card style override on the wrapper", () => {
     const { container } = renderCard({ ...base, type: "headline",
       style: { background: { type: "solid", color: "#ff0000" }, textColor: "#00ff00" },

@@ -14,5 +14,10 @@ export function newCard(type: CardType, grid: GridRect): Card {
     case "hero": return { id, type, grid, content: { title: { text: "Product" } } };
     case "list": return { id, type, grid, content: {
       title: { text: "Highlights" }, items: [{ text: "First" }, { text: "Second" }], marker: "bullet" } };
+    case "iconRow": return { id, type, grid, content: {
+      items: [
+        { icon: { kind: "emoji", value: "📷" }, label: { text: "0.5x" } },
+        { icon: { kind: "emoji", value: "📷" }, label: { text: "2x" } },
+      ] } };
   }
 }

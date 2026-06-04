@@ -6,6 +6,7 @@ import { ImageCard } from "./cards/ImageCard";
 import { IconCard } from "./cards/IconCard";
 import { HeroCard } from "./cards/HeroCard";
 import { ListCard } from "./cards/ListCard";
+import { IconRowCard } from "./cards/IconRowCard";
 
 export function CardView({ card, theme }: { card: Card; theme: SlideDocument["theme"] }) {
   const inner = (() => {
@@ -16,6 +17,7 @@ export function CardView({ card, theme }: { card: Card; theme: SlideDocument["th
       case "icon": return <IconCard card={card} theme={theme} />;
       case "hero": return <HeroCard card={card} theme={theme} />;
       case "list": return <ListCard card={card} theme={theme} />;
+      case "iconRow": return <IconRowCard card={card} theme={theme} />;
     }
   })();
   return <div style={{ height: "100%", ...resolveCardStyle(theme, card) }}>{inner}</div>;
