@@ -29,8 +29,9 @@ export function EditorPage() {
       if (!mod || (e.target as HTMLElement).isContentEditable) return;
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); store.getState().undo(); }
-      if ((e.key === "z" && e.shiftKey) || e.key === "y") { e.preventDefault(); store.getState().redo(); }
+      const key = e.key.toLowerCase(); // caps-lock safe
+      if (key === "z" && !e.shiftKey) { e.preventDefault(); store.getState().undo(); }
+      if ((key === "z" && e.shiftKey) || key === "y") { e.preventDefault(); store.getState().redo(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);

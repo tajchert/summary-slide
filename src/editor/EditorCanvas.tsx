@@ -18,11 +18,17 @@ export function EditorCanvas() {
 
   const commitText = (cardId: string, path: string, text: string) => {
     updateCard(cardId, (card) => {
-      // path like "content.value" or "content.items.2" — walk to parent, set .text
+      // path like "content.value" or "content.items.2" — walk to the RichText node, set .text.
+      // Defensive: a stale path (e.g. overlay removed mid-edit) is a no-op, not a throw.
       const segs = path.split(".");
       let node: unknown = card;
-      for (const seg of segs) node = (node as Record<string, unknown>)[seg];
-      (node as { text: string }).text = text;
+      for (const seg of segs) {
+        if (node == null || typeof node !== "object") return;
+        node = (node as Record<string, unknown>)[seg];
+      }
+      if (node != null && typeof node === "object") {
+        (node as { text: string }).text = text;
+      }
     });
   };
 

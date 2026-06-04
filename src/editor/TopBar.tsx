@@ -1,9 +1,17 @@
+import { useEffect, useState } from "react";
 import { useEditor } from "./EditorContext";
 
 export function TopBar() {
   const title = useEditor((s) => s.doc.title);
   const mode = useEditor((s) => s.doc.theme.mode);
   const setTitle = useEditor((s) => s.setTitle);
+
+  // Local draft so typing doesn't push one undo entry per keystroke; commit on blur/Enter.
+  const [draftTitle, setDraftTitle] = useState(title);
+  useEffect(() => setDraftTitle(title), [title]); // sync on undo/redo/doc switch
+  const commitTitle = () => {
+    if (draftTitle !== title) setTitle(draftTitle);
+  };
   const setTheme = useEditor((s) => s.setTheme);
   const undo = useEditor((s) => s.undo);
   const redo = useEditor((s) => s.redo);
@@ -15,7 +23,10 @@ export function TopBar() {
   return (
     <div className="flex h-12 shrink-0 items-center gap-2 border-b border-neutral-800 px-3">
       <a href="/" className="text-sm text-neutral-400 hover:text-white">←</a>
-      <input value={title} onChange={(e) => setTitle(e.target.value)} aria-label="Slide title"
+      <input value={draftTitle} onChange={(e) => setDraftTitle(e.target.value)}
+        onBlur={commitTitle}
+        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+        aria-label="Slide title"
         className="w-56 rounded bg-transparent px-2 py-1 text-sm font-medium hover:bg-neutral-900 focus:bg-neutral-900" />
       <div className="flex-1" />
       <button className={btn} onClick={undo} disabled={!canUndo} aria-label="Undo">↩</button>

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 
 interface Props {
@@ -13,6 +13,20 @@ export function EditableText({ text, style, onCommit }: Props) {
   const ref = useRef<HTMLSpanElement>(null);
   // cancelled flag: set on Escape so the blur handler does not commit
   const cancelled = useRef(false);
+
+  // Focus the freshly-mounted editing span and place the caret at the end.
+  useEffect(() => {
+    if (!editing || !ref.current) return;
+    ref.current.focus();
+    const sel = window.getSelection();
+    if (sel) {
+      const range = document.createRange();
+      range.selectNodeContents(ref.current);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }, [editing]);
 
   if (!editing) {
     return (
