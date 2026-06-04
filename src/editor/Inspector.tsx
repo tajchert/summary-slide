@@ -76,7 +76,7 @@ export function Inspector() {
               {rt("Overlay text", card.content.overlay.text,
                 (c, v) => { if (c.type === "image" && c.content.overlay) c.content.overlay.text = v; })}
               <SelectInput label="Placement" value={card.content.overlay.placement}
-                options={["corner", "center-pill"] as const}
+                options={["corner", "center-pill", "bottom"] as const}
                 onChange={(placement) => updateCard(card.id, (c) => {
                   if (c.type === "image" && c.content.overlay) c.content.overlay.placement = placement;
                 })} />

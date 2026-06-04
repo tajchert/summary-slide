@@ -61,7 +61,7 @@ export const cardSchema = z.discriminatedUnion("type", [
     position: z.string().optional(),             // CSS object-position, default "center"
     overlay: z.object({
       text: richTextSchema,
-      placement: z.enum(["corner", "center-pill"]),
+      placement: z.enum(["corner", "center-pill", "bottom"]),
     }).optional(),
   }) }),
   z.object({ ...cardBase, type: z.literal("icon"), content: z.object({

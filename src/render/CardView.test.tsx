@@ -129,6 +129,18 @@ describe("CardView", () => {
     expect(screen.getByText(/add code/i)).toBeInTheDocument();
   });
 
+  it("image overlay placement=bottom renders a bottom-centered label", () => {
+    const { container } = renderCard({ ...base, type: "image", content: {
+      src: "/i/x.png", fit: "cover",
+      overlay: { text: { text: "Game Overlay" }, placement: "bottom" } } });
+    expect(screen.getByText("Game Overlay")).toBeInTheDocument();
+    const label = container.querySelector("[data-overlay-bottom]") as HTMLElement;
+    expect(label.style.bottom).toBe("20px");
+    expect(label.style.textAlign).toBe("center");
+    const shadowed = label.firstElementChild as HTMLElement;
+    expect(shadowed.style.textShadow).toContain("rgba(0,0,0");
+  });
+
   it("applies card style override on the wrapper", () => {
     const { container } = renderCard({ ...base, type: "headline",
       style: { background: { type: "solid", color: "#ff0000" }, textColor: "#00ff00" },
