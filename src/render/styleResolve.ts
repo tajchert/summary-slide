@@ -4,11 +4,13 @@ import type { Background, Card, RichText, SlideDocument } from "../schema/slide"
 /**
  * Single font stack for everything slide-rendered (editor canvas, share preview,
  * both export paths) — keeping these identical is part of the pixel-fidelity
- * guarantee. Emoji families are listed explicitly so emoji like ⚡ pick a color
- * emoji font instead of a monochrome symbol glyph (matters in headless Chromium).
+ * guarantee. Emoji families come right after Inter (they contain no Latin glyphs,
+ * so text never hits them) and BEFORE system-ui: on Linux/headless Chromium,
+ * system-ui resolves to DejaVu Sans which owns a monochrome U+26A1 (⚡) glyph
+ * that would otherwise shadow the color emoji font.
  */
 export const SLIDE_FONT_FAMILY =
-  '"Inter Variable", system-ui, -apple-system, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+  '"Inter Variable", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, -apple-system, sans-serif';
 
 export interface ThemeTokens {
   cardBg: string;
