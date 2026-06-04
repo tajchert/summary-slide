@@ -12,6 +12,7 @@ export default defineWorkersConfig(async () => {
           wrangler: { configPath: "../wrangler.jsonc" },
           miniflare: {
             bindings: { TEST_MIGRATIONS: migrations },
+            ratelimits: { RATE_LIMITER: { simple: { limit: 30, period: 60 } } },
           },
         },
       },

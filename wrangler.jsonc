@@ -18,5 +18,13 @@
   }],
   "r2_buckets": [{ "binding": "BUCKET", "bucket_name": "summary-slide" }],
   "browser": { "binding": "BROWSER" },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  "unsafe": {
+    "bindings": [{
+      "name": "RATE_LIMITER",
+      "type": "ratelimit",
+      "namespace_id": "1001",
+      "simple": { "limit": 30, "period": 60 }
+    }]
+  }
 }

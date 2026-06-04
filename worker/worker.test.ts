@@ -137,3 +137,17 @@ describe("export API validation", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("rate limiting", () => {
+  it("returns 429 when the limiter denies", async () => {
+    const orig = env.RATE_LIMITER;
+    (env as { RATE_LIMITER: unknown }).RATE_LIMITER = { limit: async () => ({ success: false }) };
+    const res = await request("/api/slides", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    });
+    (env as { RATE_LIMITER: unknown }).RATE_LIMITER = orig;
+    expect(res.status).toBe(429);
+  });
+});
