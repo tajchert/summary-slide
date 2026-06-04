@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { slides } from "./slides";
 
 export interface Env {
   ASSETS: Fetcher;
@@ -10,5 +11,6 @@ export interface Env {
 const app = new Hono<{ Bindings: Env }>();
 
 app.get("/api/health", (c) => c.json({ ok: true }));
+app.route("/api/slides", slides);
 
 export default app;
