@@ -21,9 +21,11 @@ exportRoute.post("/", async (c) => {
   const cached = await c.env.BUCKET.head(key);
   if (cached) return c.json({ url: `/i/${key}` });
 
+  // Dynamic import: a module-scope import of @cloudflare/puppeteer breaks the vitest workers pool.
   const { default: puppeteer } = await import("@cloudflare/puppeteer");
-  const browser = await puppeteer.launch(c.env.BROWSER);
+  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
+    browser = await puppeteer.launch(c.env.BROWSER);
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: scale });
     const origin = new URL(c.req.url).origin;
@@ -36,6 +38,6 @@ exportRoute.post("/", async (c) => {
     console.error("export failed", err);
     return c.json({ error: "Export failed — try the quick export" }, 502);
   } finally {
-    await browser.close();
+    await browser?.close();
   }
 });
