@@ -9,19 +9,29 @@ import { EditorCanvas } from "./EditorCanvas";
 import { Palette } from "./Palette";
 import { Inspector } from "./Inspector";
 import { TopBar } from "./TopBar";
+import { templates } from "../templates";
 
 export function EditorPage() {
   const [params] = useSearchParams();
   const requestedId = params.get("d");
+  const templateId = params.get("t");
 
   const { store, corrupt } = useMemo(() => {
+    if (templateId) {
+      const tpl = templates.find((t) => t.id === templateId);
+      if (tpl) {
+        const doc = structuredClone(tpl.doc);
+        doc.title = tpl.name;
+        return { store: createEditorStore(doc, nanoid(8)), corrupt: false };
+      }
+    }
     if (requestedId) {
       const doc = loadDoc(requestedId);
       if (doc) return { store: createEditorStore(doc, requestedId), corrupt: false };
       return { store: createEditorStore(blankDocument(), requestedId), corrupt: true };
     }
     return { store: createEditorStore(blankDocument(), nanoid(8)), corrupt: false };
-  }, [requestedId]);
+  }, [requestedId, templateId]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
