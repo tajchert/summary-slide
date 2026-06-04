@@ -5,6 +5,7 @@ import { blankDocument } from "../schema/slide";
 import { loadDoc } from "../lib/storage";
 import { createEditorStore } from "./store";
 import { EditorStoreContext } from "./EditorContext";
+import { EditorCanvas } from "./EditorCanvas";
 
 export function EditorPage() {
   const [params] = useSearchParams();
@@ -30,7 +31,9 @@ export function EditorPage() {
         <div className="h-12 shrink-0 border-b border-neutral-800" data-pane="topbar" />
         <div className="flex min-h-0 flex-1">
           <aside className="w-44 shrink-0 overflow-y-auto border-r border-neutral-800" data-pane="palette" />
-          <main className="flex min-w-0 flex-1 items-center justify-center bg-neutral-900" data-pane="canvas" />
+          <main className="flex min-w-0 flex-1 items-center justify-center overflow-auto bg-neutral-900 p-6" data-pane="canvas">
+            <EditorCanvas />
+          </main>
           <aside className="w-80 shrink-0 overflow-y-auto border-l border-neutral-800" data-pane="inspector" />
         </div>
       </div>
