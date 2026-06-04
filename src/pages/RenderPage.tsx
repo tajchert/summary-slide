@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import type { SlideDocument } from "../schema/slide";
+import { slideDocumentSchema } from "../schema/slide";
 import { fetchSlide } from "../lib/api";
 import { SlideRenderer } from "../render/SlideRenderer";
 
@@ -9,7 +10,15 @@ export function RenderPage() {
   const [doc, setDoc] = useState<SlideDocument | null>(null);
 
   useEffect(() => {
-    if (id) fetchSlide(id).then(setDoc);
+    if (!id) return;
+    // Parity with SharePage: validate + never hang silently. On failure the export
+    // worker's waitForSelector times out and returns its 502 — no render-ready signal.
+    fetchSlide(id)
+      .then((d) => {
+        const parsed = d ? slideDocumentSchema.safeParse(d) : null;
+        setDoc(parsed?.success ? parsed.data : null);
+      })
+      .catch(() => setDoc(null));
   }, [id]);
 
   useEffect(() => {
