@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useEditor } from "./EditorContext";
+import { useEditor, useEditorStore } from "./EditorContext";
+import { quickExport } from "./quickExport";
 
 export function TopBar() {
   const title = useEditor((s) => s.doc.title);
@@ -17,6 +18,8 @@ export function TopBar() {
   const redo = useEditor((s) => s.redo);
   const canUndo = useEditor((s) => s.past.length > 0);
   const canRedo = useEditor((s) => s.future.length > 0);
+  const store = useEditorStore();
+  const [exporting, setExporting] = useState(false);
 
   const btn = "rounded-md border border-neutral-700 px-3 py-1 text-sm hover:bg-neutral-800 disabled:opacity-40";
 
@@ -35,7 +38,14 @@ export function TopBar() {
         onClick={() => setTheme({ mode: mode === "dark" ? "light" : "dark" })}>
         {mode === "dark" ? "☀️ Light" : "🌙 Dark"}
       </button>
-      <button className={btn} disabled data-action="quick-export">Quick PNG</button>
+      <button className={btn} data-action="quick-export" disabled={exporting}
+        onClick={async () => {
+          setExporting(true);
+          try { await quickExport(store.getState().doc, 2); }
+          finally { setExporting(false); }
+        }}>
+        {exporting ? "Exporting…" : "Quick PNG"}
+      </button>
       <button className={`${btn} border-blue-700 bg-blue-600 hover:bg-blue-500`} disabled data-action="hq-export">
         HQ Export
       </button>
