@@ -4,7 +4,7 @@ import type ReactGridLayout from "react-grid-layout";
 import { GRID_COLS, GRID_ROWS } from "../schema/slide";
 import { backgroundToCss } from "../render/styleResolve";
 import { CardView } from "../render/CardView";
-import { useEditor } from "./EditorContext";
+import { useEditor, InlineEditContext, InlineEditCardContext } from "./EditorContext";
 
 const DISPLAY_WIDTH = 960; // px; canvas is scaled-down 1920x1080
 
@@ -14,6 +14,17 @@ export function EditorCanvas() {
   const selectCard = useEditor((s) => s.selectCard);
   const moveResizeCard = useEditor((s) => s.moveResizeCard);
   const removeCard = useEditor((s) => s.removeCard);
+  const updateCard = useEditor((s) => s.updateCard);
+
+  const commitText = (cardId: string, path: string, text: string) => {
+    updateCard(cardId, (card) => {
+      // path like "content.value" or "content.items.2" — walk to parent, set .text
+      const segs = path.split(".");
+      let node: unknown = card;
+      for (const seg of segs) node = (node as Record<string, unknown>)[seg];
+      (node as { text: string }).text = text;
+    });
+  };
 
   const scale = DISPLAY_WIDTH / doc.canvas.width;
   const displayHeight = doc.canvas.height * scale;
@@ -88,7 +99,11 @@ export function EditorCanvas() {
               transform: `scale(${scale})`, transformOrigin: "top left",
               fontFamily: '"Inter Variable", system-ui, sans-serif',
             }}>
-              <CardView card={card} theme={doc.theme} />
+              <InlineEditContext.Provider value={commitText}>
+                <InlineEditCardContext.Provider value={card.id}>
+                  <CardView card={card} theme={doc.theme} />
+                </InlineEditCardContext.Provider>
+              </InlineEditContext.Provider>
             </div>
           </div>
         ))}

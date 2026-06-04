@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router";
 import { nanoid } from "nanoid";
 import { blankDocument } from "../schema/slide";
@@ -8,6 +8,7 @@ import { EditorStoreContext } from "./EditorContext";
 import { EditorCanvas } from "./EditorCanvas";
 import { Palette } from "./Palette";
 import { Inspector } from "./Inspector";
+import { TopBar } from "./TopBar";
 
 export function EditorPage() {
   const [params] = useSearchParams();
@@ -22,6 +23,19 @@ export function EditorPage() {
     return { store: createEditorStore(blankDocument(), nanoid(8)), corrupt: false };
   }, [requestedId]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod || (e.target as HTMLElement).isContentEditable) return;
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); store.getState().undo(); }
+      if ((e.key === "z" && e.shiftKey) || e.key === "y") { e.preventDefault(); store.getState().redo(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [store]);
+
   return (
     <EditorStoreContext.Provider value={store}>
       <div className="flex h-screen flex-col bg-neutral-950 text-neutral-100">
@@ -30,7 +44,7 @@ export function EditorPage() {
             Couldn't load that slide (corrupt or outdated) — started fresh.
           </div>
         )}
-        <div className="h-12 shrink-0 border-b border-neutral-800" data-pane="topbar" />
+        <TopBar />
         <div className="flex min-h-0 flex-1">
           <aside className="w-44 shrink-0 overflow-y-auto border-r border-neutral-800" data-pane="palette">
             <Palette />

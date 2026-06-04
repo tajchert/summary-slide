@@ -16,3 +16,9 @@ export function useEditorStore(): EditorStore {
   if (!store) throw new Error("useEditorStore outside EditorStoreContext");
   return store;
 }
+
+/** Provided only inside the editor canvas. Maps a card-relative dot-path to a commit fn. */
+export const InlineEditContext = createContext<
+  ((cardId: string, path: string, text: string) => void) | null
+>(null);
+export const InlineEditCardContext = createContext<string | null>(null);
