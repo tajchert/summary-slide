@@ -24,11 +24,15 @@ export function Palette() {
         {TILES.map((tile) => (
           <button
             key={tile.type}
-            onClick={() => setFullMsg(!addCard(tile.type))}
-            className="flex flex-col items-center gap-1 rounded-lg border border-neutral-800
+            type="button"
+            onClick={() => {
+              const added = addCard(tile.type);
+              setFullMsg(!added);
+            }}
+            className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-neutral-800
               bg-neutral-900 py-3 text-neutral-300 hover:border-neutral-600 hover:bg-neutral-800"
           >
-            <span className="text-lg leading-none">{tile.glyph}</span>
+            <span className="text-lg leading-none" aria-hidden="true">{tile.glyph}</span>
             <span className="text-xs">{tile.label}</span>
           </button>
         ))}
