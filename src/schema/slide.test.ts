@@ -31,6 +31,8 @@ describe("slideDocumentSchema", () => {
           { value: { text: '6.9"' }, caption: { text: "Pro Max" } },
           { prefix: { text: "Up to" }, value: { text: '6.3"' } },
         ] } },
+      { id: "i", type: "code", grid: { x: 3, y: 5, w: 5, h: 1 },
+        content: { code: "let x = 1", language: "swift", title: { text: "Foundation Models" } } },
     ];
     const res = slideDocumentSchema.safeParse(doc);
     expect(res.success).toBe(true);
@@ -78,6 +80,13 @@ describe("slideDocumentSchema", () => {
     const doc = blankDocument();
     doc.cards = [{ id: "a", type: "iconRow", grid: { x: 0, y: 0, w: 3, h: 1 },
       content: { items: [] } } as never];
+    expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
+  });
+
+  it("rejects a code card with an unsupported language", () => {
+    const doc = blankDocument();
+    doc.cards = [{ id: "a", type: "code", grid: { x: 0, y: 0, w: 5, h: 2 },
+      content: { code: "x", language: "cobol" } } as never];
     expect(slideDocumentSchema.safeParse(doc).success).toBe(false);
   });
 

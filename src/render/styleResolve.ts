@@ -12,6 +12,16 @@ import type { Background, Card, RichText, SlideDocument } from "../schema/slide"
 export const SLIDE_FONT_FAMILY =
   '"Inter Variable", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", system-ui, -apple-system, sans-serif';
 
+/**
+ * Mono stack for code cards — same everywhere for the same pixel-fidelity reason.
+ * Emoji families come BEFORE the generic `monospace` fallback (e.g. a `// 🚀`
+ * comment): on Linux/headless Chromium, generic monospace resolves to DejaVu Sans
+ * Mono, which owns monochrome emoji glyphs that would otherwise shadow the color
+ * emoji fonts and export an emoji as flat black-and-white.
+ */
+export const SLIDE_MONO_FONT_FAMILY =
+  'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace';
+
 export interface ThemeTokens {
   cardBg: string;
   text: string;

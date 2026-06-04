@@ -45,5 +45,6 @@ describe("defaultSpan", () => {
     expect(defaultSpan("list")).toEqual({ w: 3, h: 3 });
     expect(defaultSpan("iconRow")).toEqual({ w: 4, h: 1 });
     expect(defaultSpan("statGroup")).toEqual({ w: 3, h: 2 });
+    expect(defaultSpan("code")).toEqual({ w: 5, h: 2 });
   });
 });

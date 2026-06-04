@@ -24,5 +24,8 @@ export function newCard(type: CardType, grid: GridRect): Card {
         { prefix: { text: "Up to" }, value: { text: "16-core" }, caption: { text: "CPU" } },
         { prefix: { text: "Up to" }, value: { text: "40-core" }, caption: { text: "GPU" } },
       ], layout: "column" } };
+    case "code": return { id, type, grid, content: {
+      code: 'let session = LanguageModelSession()\nlet response = try await\n  session.respond(to: "Tell a joke")',
+      language: "swift" } };
   }
 }

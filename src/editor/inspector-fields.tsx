@@ -14,6 +14,21 @@ export function TextInput({ label, value, onChange }: {
   );
 }
 
+export function TextAreaInput({ label, value, onChange, rows = 6 }: {
+  label: string; value: string; onChange: (v: string) => void; rows?: number;
+}) {
+  const id = useId();
+  return (
+    <div className="mb-2">
+      <label htmlFor={id} className="block text-xs text-neutral-400">{label}</label>
+      <textarea id={id} value={value} rows={rows} spellCheck={false}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-0.5 w-full resize-none rounded border border-neutral-700 bg-neutral-900 px-2 py-1
+          font-mono text-xs" />
+    </div>
+  );
+}
+
 export function NumberInput({ label, value, onChange, placeholder }: {
   label: string; value: number | undefined; onChange: (v: number | undefined) => void;
   placeholder?: string;

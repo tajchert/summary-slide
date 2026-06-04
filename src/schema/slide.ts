@@ -95,6 +95,11 @@ export const cardSchema = z.discriminatedUnion("type", [
     })).min(1).max(6),
     layout: z.enum(["column", "row"]),
   }) }),
+  z.object({ ...cardBase, type: z.literal("code"), content: z.object({
+    code: z.string(),
+    language: z.enum(["swift", "typescript", "javascript", "python", "json", "bash"]),
+    title: richTextSchema.optional(),
+  }) }),
 ]);
 export type Card = z.infer<typeof cardSchema>;
 export type CardType = Card["type"];

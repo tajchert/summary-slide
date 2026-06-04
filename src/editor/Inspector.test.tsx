@@ -118,6 +118,19 @@ describe("Inspector", () => {
     expect(screen.queryByRole("button", { name: /remove stat/i })).not.toBeInTheDocument();
   });
 
+  it("code: edits source via textarea and switches language", async () => {
+    const store = setup("code");
+    const textarea = screen.getByLabelText(/^code$/i);
+    await userEvent.clear(textarea);
+    await userEvent.type(textarea, "print(1)");
+    let card = store.getState().doc.cards[0];
+    expect(card.type === "code" && card.content.code).toBe("print(1)");
+
+    await userEvent.selectOptions(screen.getByLabelText(/language/i), "python");
+    card = store.getState().doc.cards[0];
+    expect(card.type === "code" && card.content.language).toBe("python");
+  });
+
   it("statGroup: disables add at 6 stats", async () => {
     const store = setup("statGroup");
     const addBtn = screen.getByRole("button", { name: /\+ add stat/i });

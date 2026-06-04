@@ -1,6 +1,6 @@
 import type { Card, RichText as RichTextValue } from "../schema/slide";
 import { useEditor } from "./EditorContext";
-import { RichTextControls, BackgroundControls, TextInput, SelectInput, ColorInput, NumberInput }
+import { RichTextControls, BackgroundControls, TextInput, SelectInput, ColorInput, NumberInput, TextAreaInput }
   from "./inspector-fields";
 import { ImageUploadField } from "./ImageUploadField"; // Task 17; until then see Step 5
 
@@ -214,6 +214,22 @@ export function Inspector() {
             onChange={(layout) => updateCard(card.id, (c) => {
               if (c.type === "statGroup") c.content.layout = layout;
             })} />
+        </>
+      )}
+
+      {card.type === "code" && (
+        <>
+          <TextAreaInput label="Code" value={card.content.code}
+            onChange={(code) => updateCard(card.id, (c) => {
+              if (c.type === "code") c.content.code = code;
+            })} />
+          <SelectInput label="Language" value={card.content.language}
+            options={["swift", "typescript", "javascript", "python", "json", "bash"] as const}
+            onChange={(language) => updateCard(card.id, (c) => {
+              if (c.type === "code") c.content.language = language;
+            })} />
+          {rt("Title (optional)", card.content.title ?? { text: "" },
+            (c, v) => { if (c.type === "code") c.content.title = v.text ? v : undefined; })}
         </>
       )}
 

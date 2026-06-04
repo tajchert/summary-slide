@@ -115,6 +115,20 @@ describe("CardView", () => {
     expect(container.querySelectorAll("[data-divider]")).toHaveLength(1);
   });
 
+  it("code renders highlighted source in a monospace pre with title", () => {
+    const { container } = renderCard({ ...base, type: "code", content: {
+      code: 'let x = "hi"', language: "swift", title: { text: "Foundation Models" } } });
+    const pre = container.querySelector("pre")!;
+    expect(pre.textContent).toBe('let x = "hi"');
+    expect(pre.style.fontFamily).toContain("monospace");
+    expect(screen.getByText("Foundation Models")).toBeInTheDocument();
+  });
+
+  it("code renders a placeholder when empty", () => {
+    renderCard({ ...base, type: "code", content: { code: "", language: "swift" } });
+    expect(screen.getByText(/add code/i)).toBeInTheDocument();
+  });
+
   it("applies card style override on the wrapper", () => {
     const { container } = renderCard({ ...base, type: "headline",
       style: { background: { type: "solid", color: "#ff0000" }, textColor: "#00ff00" },
