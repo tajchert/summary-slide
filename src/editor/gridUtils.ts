@@ -7,6 +7,7 @@ export function rectsOverlap(a: GridRect, b: GridRect): boolean {
 
 /** First top-left position where a w×h card fits without colliding; null if full. */
 export function firstFreeCell(occupied: GridRect[], w: number, h: number): GridRect | null {
+  if (w <= 0 || h <= 0 || w > GRID_COLS || h > GRID_ROWS) return null;
   for (let y = 0; y <= GRID_ROWS - h; y++) {
     for (let x = 0; x <= GRID_COLS - w; x++) {
       const candidate = { x, y, w, h };

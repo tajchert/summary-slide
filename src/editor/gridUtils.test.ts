@@ -25,6 +25,10 @@ describe("firstFreeCell", () => {
   it("returns null when nothing fits", () => {
     expect(firstFreeCell([r(0, 0, 12, 6)], 1, 1)).toBeNull();
   });
+  it("returns null for degenerate spans", () => {
+    expect(firstFreeCell([], 13, 1)).toBeNull();
+    expect(firstFreeCell([], 0, 1)).toBeNull();
+  });
   it("fits tall cards", () => {
     expect(firstFreeCell([r(0, 0, 12, 5)], 1, 2)).toBeNull(); // only one row left
     expect(firstFreeCell([r(0, 0, 12, 4)], 1, 2)).toEqual({ x: 0, y: 4, w: 1, h: 2 });
