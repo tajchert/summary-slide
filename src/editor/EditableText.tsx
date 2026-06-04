@@ -32,6 +32,10 @@ export function EditableText({ text, style, onCommit }: Props) {
     return (
       <span
         key="display"
+        // Share the "editable-text" class so RGL's draggableCancel keeps the
+        // text from starting a card drag — otherwise the drag handler swallows
+        // the dblclick that enters edit mode.
+        className="editable-text"
         style={style}
         contentEditable={false}
         suppressContentEditableWarning

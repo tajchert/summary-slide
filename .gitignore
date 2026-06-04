@@ -1,6 +1,9 @@
 node_modules/
 dist/
 dist-ssr/
+test-results/
+playwright-report/
+playwright/.cache/
 .superpowers/
 .wrangler/
 .env
