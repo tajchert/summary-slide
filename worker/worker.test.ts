@@ -108,3 +108,32 @@ describe("upload API", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("export API validation", () => {
+  it("rejects missing id", async () => {
+    const res = await request("/api/export", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ scale: 2 }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects out-of-range scale", async () => {
+    const res = await request("/api/export", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id: "abc12345", scale: 9 }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it("404s for unknown slide id before launching a browser", async () => {
+    const res = await request("/api/export", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id: "missing1", scale: 2 }),
+    });
+    expect(res.status).toBe(404);
+  });
+});

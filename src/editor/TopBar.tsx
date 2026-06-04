@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useEditor, useEditorStore } from "./EditorContext";
 import { quickExport } from "./quickExport";
-import { saveSlide } from "../lib/api";
+import { saveSlide, requestHqExport } from "../lib/api";
 
 export function TopBar() {
   const title = useEditor((s) => s.doc.title);
@@ -21,6 +21,7 @@ export function TopBar() {
   const canRedo = useEditor((s) => s.future.length > 0);
   const store = useEditorStore();
   const [exporting, setExporting] = useState(false);
+  const [hqState, setHqState] = useState<"idle" | "working" | "error">("idle");
   const [shareState, setShareState] = useState<"idle" | "saving" | "copied" | "error">("idle");
 
   const btn = "rounded-md border border-neutral-700 px-3 py-1 text-sm hover:bg-neutral-800 disabled:opacity-40";
@@ -49,8 +50,25 @@ export function TopBar() {
         }}>
         {exporting ? "Exporting…" : "Quick PNG"}
       </button>
-      <button className={`${btn} border-blue-700 bg-blue-600 hover:bg-blue-500`} disabled data-action="hq-export">
-        HQ Export
+      <button className={`${btn} border-blue-700 bg-blue-600 hover:bg-blue-500`} data-action="hq-export"
+        disabled={hqState === "working"}
+        onClick={async () => {
+          setHqState("working");
+          try {
+            const id = await saveSlide(store.getState().doc);
+            const url = await requestHqExport(id, 3);
+            const a = document.createElement("a");
+            a.href = url;
+            const safeTitle = (store.getState().doc.title || "slide").replace(/[/\\:*?"<>|]+/g, "-").trim() || "slide";
+            a.download = `${safeTitle}@3x.png`;
+            a.click();
+            setHqState("idle");
+          } catch {
+            setHqState("error");
+            setTimeout(() => setHqState("idle"), 4000);
+          }
+        }}>
+        {hqState === "working" ? "Rendering…" : hqState === "error" ? "Failed — use Quick PNG" : "HQ Export"}
       </button>
       <button
         className={btn}
