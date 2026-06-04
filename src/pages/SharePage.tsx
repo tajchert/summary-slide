@@ -22,7 +22,7 @@ export function SharePage() {
     fetchSlide(id).then((d) => {
       const parsed = d ? slideDocumentSchema.safeParse(d) : null;
       setDoc(parsed?.success ? parsed.data : null);
-    });
+    }).catch(() => setDoc(null)); // network failure → not-found page, not eternal spinner
   }, [id]);
 
   useEffect(() => {
