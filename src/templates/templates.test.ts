@@ -50,4 +50,15 @@ describe("built-in templates", () => {
     expect(modes.has("light")).toBe(true);
     expect(modes.has("dark")).toBe(true);
   });
+
+  // The new card types shipped 2026-06: the showcase templates must exercise them.
+  it("showcase templates cover every new card capability", () => {
+    const showcase = templates.filter((t) => t.id !== "everything");
+    const all = showcase.flatMap((t) => t.doc.cards);
+    expect(all.some((c) => c.type === "iconRow")).toBe(true);
+    expect(all.some((c) => c.type === "statGroup")).toBe(true);
+    expect(all.some((c) => c.type === "code")).toBe(true);
+    expect(all.some((c) => c.type === "image" && c.content.overlay?.placement === "bottom")).toBe(true);
+    expect(all.some((c) => c.type === "icon" && c.content.caption !== undefined)).toBe(true);
+  });
 });
