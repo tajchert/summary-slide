@@ -11,9 +11,11 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm test
+      # build before test:worker — the workers test pool validates wrangler.jsonc,
+      # whose assets.directory (./dist) must exist
+      - run: npm run build
       - run: npm run test:worker
       - run: npm run typecheck:worker
-      - run: npm run build
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
