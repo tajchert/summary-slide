@@ -42,6 +42,7 @@ export function TopBar() {
         onClick={async () => {
           setExporting(true);
           try { await quickExport(store.getState().doc, 2); }
+          catch (err) { console.error("Quick export failed", err); }
           finally { setExporting(false); }
         }}>
         {exporting ? "Exporting…" : "Quick PNG"}
