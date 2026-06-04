@@ -74,6 +74,18 @@ describe("Inspector", () => {
     expect(card.type === "iconRow" && card.content.items).toHaveLength(2);
   });
 
+  it("icon: setting caption text stores it; clearing removes it", async () => {
+    const store = setup("icon");
+    const input = screen.getByLabelText(/caption \(optional\)/i);
+    await userEvent.type(input, "sound system");
+    let card = store.getState().doc.cards[0];
+    expect(card.type === "icon" && card.content.caption?.text).toBe("sound system");
+
+    await userEvent.clear(input);
+    card = store.getState().doc.cards[0];
+    expect(card.type === "icon" && card.content.caption).toBeUndefined();
+  });
+
   it("iconRow: hides remove button on the last item", async () => {
     const store = setup("iconRow");
     // default card has 2 items: remove one, then the remove button disappears

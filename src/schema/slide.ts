@@ -67,6 +67,7 @@ export const cardSchema = z.discriminatedUnion("type", [
   z.object({ ...cardBase, type: z.literal("icon"), content: z.object({
     icon: iconSourceSchema,
     label: richTextSchema,
+    caption: richTextSchema.optional(),
     layout: z.enum(["top", "left", "right"]),
   }) }),
   z.object({ ...cardBase, type: z.literal("hero"), content: z.object({

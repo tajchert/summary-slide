@@ -79,6 +79,14 @@ describe("CardView", () => {
     expect(screen.getByText("Connect everything")).toBeInTheDocument();
   });
 
+  it("icon renders an optional muted caption under the label", () => {
+    renderCard({ ...base, type: "icon", content: {
+      icon: { kind: "emoji", value: "🎧" }, label: { text: "Spatial audio" },
+      caption: { text: "with dynamic head tracking" }, layout: "top" } });
+    expect(screen.getByText("Spatial audio")).toBeInTheDocument();
+    expect(screen.getByText("with dynamic head tracking")).toBeInTheDocument();
+  });
+
   it("iconRow without labels or caption renders only icons", () => {
     renderCard({ ...base, type: "iconRow", content: {
       items: [{ icon: { kind: "emoji", value: "⚡" } }] } });

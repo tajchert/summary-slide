@@ -105,6 +105,8 @@ export function Inspector() {
               })} />
           )}
           {rt("Label", card.content.label, (c, v) => { if (c.type === "icon") c.content.label = v; })}
+          {rt("Caption (optional)", card.content.caption ?? { text: "" },
+            (c, v) => { if (c.type === "icon") c.content.caption = v.text ? v : undefined; })}
           <SelectInput label="Layout" value={card.content.layout}
             options={["top", "left", "right"] as const}
             onChange={(layout) => updateCard(card.id, (c) => { if (c.type === "icon") c.content.layout = layout; })} />
