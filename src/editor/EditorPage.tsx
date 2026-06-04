@@ -7,6 +7,7 @@ import { createEditorStore } from "./store";
 import { EditorStoreContext } from "./EditorContext";
 import { EditorCanvas } from "./EditorCanvas";
 import { Palette } from "./Palette";
+import { Inspector } from "./Inspector";
 
 export function EditorPage() {
   const [params] = useSearchParams();
@@ -37,7 +38,9 @@ export function EditorPage() {
           <main className="flex min-w-0 flex-1 items-center justify-center overflow-auto bg-neutral-900 p-6" data-pane="canvas">
             <EditorCanvas />
           </main>
-          <aside className="w-80 shrink-0 overflow-y-auto border-l border-neutral-800" data-pane="inspector" />
+          <aside className="w-80 shrink-0 overflow-y-auto border-l border-neutral-800" data-pane="inspector">
+            <Inspector />
+          </aside>
         </div>
       </div>
     </EditorStoreContext.Provider>
