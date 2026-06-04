@@ -31,6 +31,10 @@ export function kitchenSinkDocument(): SlideDocument {
       content: { icon: { kind: "emoji", value: "🚀" }, label: { text: "Games" }, layout: "top" } },
     { id: "img2", type: "image", grid: { x: 6, y: 5, w: 6, h: 1 },
       content: { src: "", fit: "cover" } },
+    { id: "icon3", type: "icon", grid: { x: 9, y: 4, w: 3, h: 1 },
+      content: { icon: { kind: "emoji", value: "📶" }, label: { text: "Wi-Fi 7" }, layout: "left" } },
+    { id: "head3", type: "headline", grid: { x: 2, y: 5, w: 4, h: 1 },
+      content: { text: { text: "All-new design", size: 36 } } },
   ];
   return doc;
 }

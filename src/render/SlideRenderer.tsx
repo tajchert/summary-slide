@@ -5,7 +5,7 @@ import { CardView } from "./CardView";
 
 interface Props {
   doc: SlideDocument;
-  /** Visual scale for previews/thumbnails. Layout always computes at full canvas size. */
+  /** Visual scale for previews/thumbnails. Layout always computes at full canvas size — the PARENT must set width/height to canvas×scale and overflow:hidden to clip. */
   scale?: number;
 }
 

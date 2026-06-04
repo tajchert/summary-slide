@@ -19,9 +19,11 @@ describe("SlideRenderer", () => {
   it("places cards via grid-area", () => {
     const doc = kitchenSinkDocument();
     const { container } = render(<SlideRenderer doc={doc} />);
-    const first = (container.firstChild as HTMLElement).children[0] as HTMLElement;
-    const g = doc.cards[0].grid;
-    expect(first.style.gridArea).toBe(`${g.y + 1} / ${g.x + 1} / span ${g.h} / span ${g.w}`);
+    doc.cards.forEach((card, i) => {
+      const el = (container.firstChild as HTMLElement).children[i] as HTMLElement;
+      const g = card.grid;
+      expect(el.style.gridArea).toBe(`${g.y + 1} / ${g.x + 1} / span ${g.h} / span ${g.w}`);
+    });
   });
 
   it("applies theme background and scale transform", () => {

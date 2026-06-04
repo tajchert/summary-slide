@@ -107,7 +107,7 @@ export function blankDocument(): SlideDocument {
       mode: "dark",
       accent: "#0a84ff",
       background: { type: "solid", color: "#000000" },
-      cardStyle: { radius: 24, gap: 16 },
+      cardStyle: { radius: 24, gap: 24 },
     },
     cards: [],
   };
