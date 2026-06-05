@@ -96,9 +96,9 @@ describe("upload API", () => {
     expect(res.status).toBe(415);
   });
 
-  it("rejects files over 10MB", async () => {
+  it("rejects files over 3MB", async () => {
     const form = new FormData();
-    form.append("file", new Blob([new Uint8Array(10 * 1024 * 1024 + 1)], { type: "image/png" }), "big.png");
+    form.append("file", new Blob([new Uint8Array(3 * 1024 * 1024 + 1)], { type: "image/webp" }), "big.webp");
     const res = await request("/api/upload", { method: "POST", body: form });
     expect(res.status).toBe(413);
   });

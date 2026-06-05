@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { uploadImage } from "../lib/api";
 import { TextInput } from "./inspector-fields";
+import { prepareImageForUpload } from "./imagePrepare";
 
 export function ImageUploadField({ label, value, onChange }: {
   label: string; value: string; onChange: (src: string) => void;
@@ -25,7 +26,7 @@ export function ImageUploadField({ label, value, onChange }: {
           if (!file) return;
           setState("uploading");
           try {
-            onChange(await uploadImage(file));
+            onChange(await uploadImage(await prepareImageForUpload(file)));
             setState("idle");
           } catch (err) {
             setError(err instanceof Error ? err.message : "Upload failed");

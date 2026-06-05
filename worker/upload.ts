@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { Env } from "./index";
 
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 3 * 1024 * 1024;
 const TYPES: Record<string, string> = {
   "image/png": "png",
   "image/jpeg": "jpg",
@@ -16,7 +16,7 @@ upload.post("/", async (c) => {
   if (!(file instanceof File)) return c.json({ error: "No file" }, 400);
   const ext = TYPES[file.type];
   if (!ext) return c.json({ error: "Only PNG, JPEG, WebP allowed" }, 415);
-  if (file.size > MAX_BYTES) return c.json({ error: "Max 10MB" }, 413);
+  if (file.size > MAX_BYTES) return c.json({ error: "Max 3MB" }, 413);
 
   const buf = await file.arrayBuffer();
   const digest = await crypto.subtle.digest("SHA-256", buf);
