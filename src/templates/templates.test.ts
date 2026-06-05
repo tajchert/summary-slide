@@ -1,7 +1,19 @@
 import { describe, it, expect } from "vitest";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { templates } from "./index";
 import { slideDocumentSchema, GRID_COLS, GRID_ROWS } from "../schema/slide";
 import { rectsOverlap } from "../editor/gridUtils";
+
+const expectedTemplateImages = [
+  ["apple-bento-dark", "t1-img1", "/template-images/apple-bento-dark-t1-img1-four-colors.png"],
+  ["apple-bento-dark", "t1-img2", "/template-images/apple-bento-dark-t1-img2-center-stage-camera.png"],
+  ["pixel-light", "t2-img1", "/template-images/pixel-light-t2-img1-video-boost.png"],
+  ["pixel-light", "t2-img2", "/template-images/pixel-light-t2-img2-matte-finish.png"],
+  ["pixel-light", "t2-img3", "/template-images/pixel-light-t2-img3-pro-controls.png"],
+  ["developer-keynote-light", "t6-img1", "/template-images/developer-keynote-light-t6-img1-visionos.png"],
+  ["airpods-light", "t7-img1", "/template-images/airpods-light-t7-img1-best-fitting.png"],
+] as const;
 
 describe("built-in templates", () => {
   it("there are at least 4, all schema-valid", () => {
@@ -60,5 +72,17 @@ describe("built-in templates", () => {
     expect(all.some((c) => c.type === "code")).toBe(true);
     expect(all.some((c) => c.type === "image" && c.content.overlay?.placement === "bottom")).toBe(true);
     expect(all.some((c) => c.type === "icon" && c.content.caption !== undefined)).toBe(true);
+  });
+
+  it("uses generated image assets for showcase image cards", () => {
+    for (const [templateId, cardId, src] of expectedTemplateImages) {
+      const template = templates.find((t) => t.id === templateId)!;
+      const card = template.doc.cards.find((c) => c.id === cardId);
+
+      expect(card?.type, `${templateId}: ${cardId}`).toBe("image");
+      if (card?.type !== "image") continue;
+      expect(card.content.src).toBe(src);
+      expect(existsSync(join(process.cwd(), "public", src))).toBe(true);
+    }
   });
 });
