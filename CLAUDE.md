@@ -39,10 +39,14 @@ src/render/codeHighlight.tsx sync Prism tokenize → inline-styled spans (see in
 src/render/SlideRenderer.tsx the single render path (CSS grid, data-slide-root)
 src/editor/store.ts          zustand vanilla store factory: commit() = snapshot to past[] +
                              structuredClone + 300ms-debounced localStorage persist; undo/redo
-                             drop stale selections
+                             drop stale selections. Optional coalesceKey on updateCard/setTheme/
+                             setTitle: same-key commits within 1s merge into one undo step
+                             (pass it for typing/number/color inputs, never for add/remove)
 src/editor/EditorCanvas.tsx  RGL wrapper; commitText() walks "content.items.2"-style dot-paths
                              (defensively — stale paths are no-ops)
-src/editor/Inspector.tsx     per-type content controls; no-selection = slide settings
+src/editor/Inspector.tsx     one `<Type>Fields` component per card type, typed via useCardEditor
+                             (`update(mutate, key?)` — key = field label ⇒ coalesced undo);
+                             no-selection = slide settings
 src/editor/quickExport.ts    html-to-image capture (see gotcha #1)
 src/templates/index.ts       built-in templates = plain SlideDocuments; templates.test.ts
                              enforces schema-validity, no overlaps, override⇒textColor, and
@@ -72,7 +76,7 @@ wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER
 
 - TDD: failing test first, then implementation (worker routes and pure helpers especially).
 - Schema changes: bump carefully — `version: z.literal(1)` is the migration hook; localStorage docs failing zod show "started fresh", shared D1 docs are validated on POST.
-- New card type checklist: schema union member → component in `src/render/cards/` → CardView dispatch → `newCard.ts` default → `defaultSpan()` → palette tile → Inspector section → CardView.test case.
+- New card type checklist: schema union member → component in `src/render/cards/` → CardView dispatch → `newCard.ts` default → `defaultSpan()` → palette tile → Inspector `<Type>Fields` + `CardFields` case → CardView.test case.
 - Item-array cards (list-like content) get a zod `.min(1).max(N)` bound plus a disabled-at-cap "+ Add" button — unbounded items silently clip in non-wrapping flex rows (iconRow ≤12, statGroup ≤6).
 - Adding POST endpoints: they're automatically rate-limited by the `/api/*` middleware; keep zod validation at the boundary like `slides.ts`.
 - Deploy: push to master (CI: test → build → test:worker → typecheck → wrangler deploy) or `npx wrangler deploy`.

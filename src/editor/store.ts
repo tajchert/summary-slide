@@ -5,6 +5,8 @@ import { newCard } from "./newCard";
 import { saveDoc } from "../lib/storage";
 
 const MAX_HISTORY = 100;
+/** Commits sharing a coalesce key within this idle window merge into one undo step. */
+const COALESCE_MS = 1000;
 
 export interface EditorState {
   doc: SlideDocument;
@@ -14,11 +16,12 @@ export interface EditorState {
   future: SlideDocument[];
   selectCard: (id: string | null) => void;
   addCard: (type: CardType) => boolean;
-  updateCard: (id: string, mutate: (card: Card) => void) => void;
+  /** `coalesceKey`: pass for continuous inputs (typing, color drags) so a burst is one undo step. */
+  updateCard: (id: string, mutate: (card: Card) => void, coalesceKey?: string) => void;
   moveResizeCard: (id: string, grid: GridRect) => void;
   removeCard: (id: string) => void;
-  setTheme: (patch: Partial<SlideDocument["theme"]>) => void;
-  setTitle: (title: string) => void;
+  setTheme: (patch: Partial<SlideDocument["theme"]>, coalesceKey?: string) => void;
+  setTitle: (title: string, coalesceKey?: string) => void;
   setDoc: (doc: SlideDocument) => void;
   undo: () => void;
   redo: () => void;
@@ -32,13 +35,22 @@ export function createEditorStore(initial: SlideDocument, localId: string) {
     saveTimer = setTimeout(() => saveDoc(id, doc), 300);
   };
 
+  // Last keyed commit; a same-key commit within COALESCE_MS replaces it instead of pushing history.
+  let lastKeyed: { key: string; at: number } | null = null;
+
   return createStore<EditorState>()((set, get) => {
     /** Record current doc into history, then apply producer to a deep copy. */
-    const commit = (produce: (doc: SlideDocument) => void) => {
+    const commit = (produce: (doc: SlideDocument) => void, coalesceKey?: string) => {
       const prev = get().doc;
       const next = structuredClone(prev);
       produce(next);
-      set({ doc: next, past: [...get().past, prev].slice(-MAX_HISTORY), future: [] });
+      const now = Date.now();
+      const merge = coalesceKey !== undefined && lastKeyed?.key === coalesceKey
+        && now - lastKeyed.at < COALESCE_MS;
+      lastKeyed = coalesceKey === undefined ? null : { key: coalesceKey, at: now };
+      set(merge
+        ? { doc: next, future: [] }
+        : { doc: next, past: [...get().past, prev].slice(-MAX_HISTORY), future: [] });
       persistDebounced(get().localId, next);
     };
 
@@ -62,10 +74,10 @@ export function createEditorStore(initial: SlideDocument, localId: string) {
         return true;
       },
 
-      updateCard: (id, mutate) => commit((doc) => {
+      updateCard: (id, mutate, coalesceKey) => commit((doc) => {
         const card = doc.cards.find((c) => c.id === id);
         if (card) mutate(card);
-      }),
+      }, coalesceKey),
 
       moveResizeCard: (id, grid) => commit((doc) => {
         const card = doc.cards.find((c) => c.id === id);
@@ -77,13 +89,14 @@ export function createEditorStore(initial: SlideDocument, localId: string) {
         if (get().selectedCardId === id) set({ selectedCardId: null });
       },
 
-      setTheme: (patch) => commit((doc) => { Object.assign(doc.theme, patch); }),
-      setTitle: (title) => commit((doc) => { doc.title = title; }),
+      setTheme: (patch, coalesceKey) => commit((doc) => { Object.assign(doc.theme, patch); }, coalesceKey),
+      setTitle: (title, coalesceKey) => commit((doc) => { doc.title = title; }, coalesceKey),
       setDoc: (doc) => commit((d) => { Object.assign(d, doc); }),
 
       undo: () => {
         const { past, doc, future, selectedCardId } = get();
         if (past.length === 0) return;
+        lastKeyed = null;
         const prev = past[past.length - 1];
         set({
           doc: prev,
@@ -98,6 +111,7 @@ export function createEditorStore(initial: SlideDocument, localId: string) {
       redo: () => {
         const { past, doc, future, selectedCardId } = get();
         if (future.length === 0) return;
+        lastKeyed = null;
         const next = future[0];
         set({
           doc: next,

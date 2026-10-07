@@ -34,6 +34,35 @@ describe("Inspector", () => {
     expect(card.type === "stat" && card.content.value.text).toBe("120Hz");
   });
 
+  it("typing into a field is one undo step, not one per keystroke", async () => {
+    const store = setup("stat");
+    const input = screen.getByLabelText(/^value$/i);
+    await userEvent.clear(input);
+    await userEvent.type(input, "120Hz");
+    store.getState().undo();
+    const card = store.getState().doc.cards[0];
+    expect(card.type === "stat" && card.content.value.text).toBe("2x");
+  });
+
+  it("slide settings: typing a number is one undo step", async () => {
+    const store = setup();
+    // append (clearing a required number snaps it back to the default)
+    await userEvent.type(screen.getByLabelText(/card radius/i), "00");
+    expect(store.getState().doc.theme.cardStyle.radius).toBe(2400);
+    store.getState().undo();
+    expect(store.getState().doc.theme.cardStyle.radius).toBe(24);
+  });
+
+  it("discrete actions (+ Add) stay separate undo steps", async () => {
+    const store = setup("statGroup");
+    const addBtn = screen.getByRole("button", { name: /\+ add stat/i });
+    await userEvent.click(addBtn);
+    await userEvent.click(addBtn);
+    store.getState().undo();
+    const card = store.getState().doc.cards[0];
+    expect(card.type === "statGroup" && card.content.stats).toHaveLength(3);
+  });
+
   it("applies text styling (size) to a field", async () => {
     const store = setup("stat");
     await userEvent.click(screen.getAllByRole("button", { name: /style/i })[0]);
