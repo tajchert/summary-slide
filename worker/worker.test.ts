@@ -26,20 +26,52 @@ describe("slides API", () => {
     return doc;
   };
 
+  const post = (body: string) => request("/api/slides", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body,
+  });
+  const postId = async (body: string) => ((await (await post(body)).json()) as { id: string }).id;
+
   it("POST then GET round-trips a slide", async () => {
-    const post = await request("/api/slides", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(validDoc()),
-    });
-    expect(post.status).toBe(201);
-    const { id } = await post.json() as { id: string };
-    expect(id).toMatch(/^[A-Za-z0-9_-]{8}$/);
+    const res = await post(JSON.stringify(validDoc()));
+    expect(res.status).toBe(201);
+    const { id } = await res.json() as { id: string };
+    expect(id).toMatch(/^[a-f0-9]{16}$/);
 
     const get = await request(`/api/slides/${id}`);
     expect(get.status).toBe(200);
     const doc = await get.json();
     expect(doc).toEqual(validDoc());
+  });
+
+  it("ids are content-addressed: same doc, same id, one row", async () => {
+    const doc = validDoc();
+    doc.title = "dedupe me";
+    const a = await postId(JSON.stringify(doc));
+    const b = await postId(JSON.stringify(doc));
+    expect(b).toBe(a);
+    const { n } = (await env.DB.prepare("SELECT COUNT(*) AS n FROM slides WHERE id = ?")
+      .bind(a).first<{ n: number }>())!;
+    expect(n).toBe(1);
+  });
+
+  it("ids ignore input key order but change with content", async () => {
+    const doc = validDoc();
+    doc.title = "key order";
+    const reordered = { cards: doc.cards, theme: doc.theme, canvas: doc.canvas, title: doc.title, version: 1 };
+    const a = await postId(JSON.stringify(doc));
+    expect(await postId(JSON.stringify(reordered))).toBe(a);
+    expect(await postId(JSON.stringify({ ...doc, title: "key order 2" }))).not.toBe(a);
+  });
+
+  it("serves stored slides as immutable, but never caches a 404", async () => {
+    const id = await postId(JSON.stringify(validDoc()));
+    const hit = await request(`/api/slides/${id}`);
+    expect(hit.headers.get("cache-control")).toContain("immutable");
+    const miss = await request("/api/slides/0000000000000000");
+    expect(miss.status).toBe(404);
+    expect(miss.headers.get("cache-control") ?? "").not.toContain("immutable");
   });
 
   it("rejects invalid documents with 400", async () => {
@@ -126,6 +158,28 @@ describe("export API validation", () => {
       body: JSON.stringify({ id: "abc12345", scale: 9 }),
     });
     expect(res.status).toBe(400);
+  });
+
+  it("serves a cached export for this deploy without launching a browser", async () => {
+    const doc = blankDocument();
+    doc.title = "cached export";
+    const posted = await request("/api/slides", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(doc),
+    });
+    const { id } = await posted.json() as { id: string };
+    // Key is scoped per deploy: same doc ids survive deploys, renderer changes must not serve stale PNGs.
+    const key = `exports/${env.CF_VERSION_METADATA.id}/${id}-2x.png`;
+    await env.BUCKET.put(key, new Uint8Array([1]), { httpMetadata: { contentType: "image/png" } });
+
+    const res = await request("/api/export", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id, scale: 2 }),
+    });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ url: `/i/${key}` });
   });
 
   it("404s for unknown slide id before launching a browser", async () => {

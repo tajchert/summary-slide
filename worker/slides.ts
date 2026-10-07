@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { nanoid } from "nanoid";
+import { sha256Hex } from "./hash";
 import { slideDocumentSchema } from "../src/schema/slide";
 import type { Env } from "./index";
 
@@ -23,16 +23,24 @@ slides.post("/", async (c) => {
   if (!result.success) {
     return c.json({ error: "Invalid slide document" }, 400);
   }
-  const id = nanoid(8);
+  // Content-addressed id: zod's output follows schema key order, so identical docs serialize
+  // (and hash) identically whatever the input key order. Re-sharing an unchanged doc reuses
+  // its row and its HQ-export cache; any edit yields a new id, so stored docs stay immutable.
+  const json = JSON.stringify(result.data);
+  const id = await sha256Hex(new TextEncoder().encode(json));
   await c.env.DB.prepare(
-    "INSERT INTO slides (id, doc, created_at) VALUES (?, ?, ?)"
-  ).bind(id, JSON.stringify(result.data), Date.now()).run();
+    "INSERT OR IGNORE INTO slides (id, doc, created_at) VALUES (?, ?, ?)"
+  ).bind(id, json, Date.now()).run();
   return c.json({ id }, 201);
 });
 
 slides.get("/:id", async (c) => {
   const row = await c.env.DB.prepare("SELECT doc FROM slides WHERE id = ?")
     .bind(c.req.param("id")).first<{ doc: string }>();
+  // No cache header on 404: a content id that's missing now can exist after its first POST.
   if (!row) return c.json({ error: "Not found" }, 404);
-  return c.body(row.doc, 200, { "content-type": "application/json" });
+  return c.body(row.doc, 200, {
+    "content-type": "application/json",
+    "cache-control": "public, max-age=31536000, immutable",
+  });
 });

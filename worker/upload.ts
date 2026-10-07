@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from "./index";
+import { sha256Hex } from "./hash";
 
 const MAX_BYTES = 3 * 1024 * 1024;
 const TYPES: Record<string, string> = {
@@ -19,10 +20,7 @@ upload.post("/", async (c) => {
   if (file.size > MAX_BYTES) return c.json({ error: "Max 3MB" }, 413);
 
   const buf = await file.arrayBuffer();
-  const digest = await crypto.subtle.digest("SHA-256", buf);
-  const hash = [...new Uint8Array(digest)].slice(0, 8)
-    .map((b) => b.toString(16).padStart(2, "0")).join("");
-  const key = `images/${hash}.${ext}`;
+  const key = `images/${await sha256Hex(buf)}.${ext}`;
   await c.env.BUCKET.put(key, buf, { httpMetadata: { contentType: file.type } });
   return c.json({ url: `/i/${key}` }, 201);
 });

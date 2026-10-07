@@ -8,6 +8,7 @@ export interface Env {
   DB: D1Database;
   BUCKET: R2Bucket;
   BROWSER: Fetcher;
+  CF_VERSION_METADATA: WorkerVersionMetadata;
   RATE_LIMITER: { limit: (opts: { key: string }) => Promise<{ success: boolean }> };
 }
 

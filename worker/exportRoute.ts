@@ -17,7 +17,9 @@ exportRoute.post("/", async (c) => {
   const slide = await c.env.DB.prepare("SELECT id FROM slides WHERE id = ?").bind(id).first();
   if (!slide) return c.json({ error: "Slide not found" }, 404);
 
-  const key = `exports/${id}-${scale}x.png`;
+  // Scoped per deploy: content-addressed ids survive deploys, but a renderer change must
+  // not keep serving PNGs rendered by the previous build.
+  const key = `exports/${c.env.CF_VERSION_METADATA.id}/${id}-${scale}x.png`;
   const cached = await c.env.BUCKET.head(key);
   if (cached) return c.json({ url: `/i/${key}` });
 

@@ -50,7 +50,8 @@ src/templates/index.ts       built-in templates = plain SlideDocuments; template
 src/lib/{storage,api}.ts     localStorage docs/recents; fetch wrappers
 worker/index.ts              Hono app + Env bindings + per-IP rate limit on /api/* POSTs
 worker/{slides,upload,exportRoute}.ts  D1 share storage / R2 uploads / Browser Rendering export
-wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER);
+worker/hash.ts               sha256Hex — content-addressed slide ids + image keys
+wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER, CF_VERSION_METADATA);
                              run_worker_first: /api/*, /i/* — everything else = SPA fallback
 ```
 
@@ -61,7 +62,7 @@ wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER
 3. **Card `style.background` overrides must ship a `textColor`.** Theme switching keeps overrides; a dark override without explicit text color becomes unreadable in light mode. Template authoring rule, enforced by review not schema.
 4. **Default `gap` is 24 because (1920−13g)/12 must be an integer** — fractional grid tracks break pixel-identical exports across engines.
 5. **Inline editing is context-injected, not forked.** `RichText` renders plain text unless `InlineEditContext` + `InlineEditCardContext` + `editPath` are all present (only the editor provides them). The display span carries class `editable-text` = RGL's `draggableCancel`, so dblclick isn't swallowed by drag. Tradeoff: drags start from card padding, not text.
-6. **Share-link docs are immutable** — every Share/HQ-export click POSTs a fresh nanoid(8) id. The HQ export cache key `exports/{id}-{scale}x.png` is safe *because* of this. Don't add doc mutation without rethinking the cache.
+6. **Share-link ids are content-addressed** — `id = sha256(JSON.stringify(zodParsed))[:16]` (`worker/hash.ts`), stored with `INSERT OR IGNORE`. Re-sharing an unchanged doc returns the same id; any edit yields a new one, so stored docs are immutable by construction (GET serves `cache-control: immutable`, but never on 404). Hash stability relies on zod output following schema key order — don't serialize the raw request body. The HQ export cache key is `exports/{CF_VERSION_METADATA.id}/{id}-{scale}x.png`: per-deploy, because the same id now survives deploys while renderer changes alter the pixels. Old nanoid(8) ids remain readable.
 7. **Version pins that look wrong but aren't:** React 18 (react-grid-layout 1.5 peer limit), `@cloudflare/vitest-pool-workers@0.12.21 exact` (last vitest-3-compatible line; newer requires vitest 4), `react() as never` in vitest.config.ts (vite 8 vs vitest-bundled-vite type skew).
 8. **Worker quirks:** `@cloudflare/puppeteer` is dynamically imported inside the export handler (module-scope import breaks the test pool). R2 image serving buffers via `arrayBuffer()` (test pool can't stream R2 bodies; objects are ≤10MB anyway). `slides.ts` size cap counts bytes via TextEncoder, not string length.
 9. **Test environment:** jsdom lacks `isContentEditable` (polyfilled in `src/test-setup.ts`) and `ResizeObserver` (guarded at use sites). `afterEach(cleanup)` is explicit — auto-cleanup didn't fire.
@@ -78,4 +79,4 @@ wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER
 
 ## Out of scope (v1, deliberate)
 
-Accounts/auth, non-16:9 canvases (schema's `canvas` field is the extension point), background removal, freeform/rotated placement, D1 pruning of old anonymous slides, HQ-export dedup for unchanged docs.
+Accounts/auth, non-16:9 canvases (schema's `canvas` field is the extension point), background removal, freeform/rotated placement, D1 pruning of old anonymous slides (content ids already dedupe re-shares), R2 lifecycle cleanup of previous deploys' `exports/` prefixes.
