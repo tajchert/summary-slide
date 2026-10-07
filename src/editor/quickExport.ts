@@ -23,6 +23,8 @@ export async function quickExport(doc: SlideDocument, pixelRatio: 2 | 3 = 2): Pr
     flushSync(() => {
       root.render(createElement(SlideRenderer, { doc }));
     });
+    // Force layout so slide-only faces (serif emphasis) start loading before we await.
+    void mount.offsetHeight;
     await (document.fonts?.ready ?? Promise.resolve());
     await waitForImages(mount);
     const dataUrl = await toPng(mount, {

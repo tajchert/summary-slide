@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { CardView } from "./CardView";
 import { blankDocument } from "../schema/slide";
 import type { Card } from "../schema/slide";
+import { SLIDE_SERIF_FONT_FAMILY } from "./styleResolve";
 
 const theme = blankDocument().theme;
 const base = { id: "c1", grid: { x: 0, y: 0, w: 2, h: 2 } };
@@ -53,6 +54,29 @@ describe("CardView", () => {
       title: { text: "macOS" }, image: "/i/bg.png", imagePlacement: "behind" } });
     expect(screen.getByText("macOS")).toBeInTheDocument();
     expect(screen.getByRole("img")).toHaveAttribute("src", "/i/bg.png");
+  });
+
+  it("hero renders an optional caption and side image placement", () => {
+    const { container } = renderCard({ ...base, type: "hero", content: {
+      title: { text: "Datacenter" }, caption: { text: "DGX Station" },
+      image: "/i/chip.png", imagePlacement: "left" } });
+    expect(screen.getByText("DGX Station")).toBeInTheDocument();
+    const root = container.firstChild!.firstChild as HTMLElement;
+    expect(root.style.flexDirection).toBe("row");
+    expect(root.firstElementChild).toBe(screen.getByRole("img"));
+  });
+
+  it("emphasis=serif-italic renders *marked* words in the serif italic stack", () => {
+    renderCard({ ...base, type: "headline", content: {
+      text: { text: "The most *powerful* Surface", emphasis: "serif-italic" } } });
+    const em = screen.getByText("powerful");
+    expect(em.tagName).toBe("EM");
+    expect(em).toHaveStyle({ fontStyle: "italic", fontFamily: SLIDE_SERIF_FONT_FAMILY });
+  });
+
+  it("without emphasis, asterisks stay literal", () => {
+    renderCard({ ...base, type: "headline", content: { text: { text: "Up to *2x*" } } });
+    expect(screen.getByText("Up to *2x*")).toBeInTheDocument();
   });
 
   it("list renders title and items with bullets", () => {

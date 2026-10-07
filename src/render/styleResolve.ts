@@ -19,6 +19,14 @@ export const SLIDE_FONT_FAMILY =
  * Mono, which owns monochrome emoji glyphs that would otherwise shadow the color
  * emoji fonts and export an emoji as flat black-and-white.
  */
+/**
+ * Serif italic for `emphasis: "serif-italic"` runs (`*word*` in a RichText).
+ * Bundled Newsreader so every render path gets the same glyphs; emoji families
+ * before the generic `serif` fallback for the same DejaVu reason as above.
+ */
+export const SLIDE_SERIF_FONT_FAMILY =
+  '"Newsreader Variable", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Georgia, serif';
+
 export const SLIDE_MONO_FONT_FAMILY =
   'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", monospace';
 

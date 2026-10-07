@@ -1,4 +1,4 @@
-import type { SlideDocument } from "../schema/slide";
+import type { Background, RichText, SlideDocument } from "../schema/slide";
 import { kitchenSinkDocument } from "../render/fixtures";
 
 export interface Template { id: string; name: string; doc: SlideDocument }
@@ -318,6 +318,64 @@ const airpodsLight: SlideDocument = {
   ],
 };
 
+// Inspired by Microsoft's 2026 "Hybrid intelligence" Windows recap slide:
+// white page, near-square tiles alternating pale sage and sky-blue gradient,
+// light sans with serif-italic *emphasis* words, product art under headlines.
+// gap 12 keeps tracks integral like gap 24 (gotcha #4): (1920−13·12)/12 = 147.
+const MS_SAGE: Background = { type: "solid", color: "#f2f4ef" };
+const MS_SKY: Background = { type: "gradient", from: "#c9e5fb", to: "#eef7fd", angle: 135 };
+const MS_INK = "#1b1b1b"; // every override ships a textColor (gotcha #3)
+const msTitle = (text: string, size: number): RichText =>
+  ({ text, size, weight: 300, letterSpacing: -0.5, emphasis: "serif-italic" });
+const MS_IMG = "/template-images/windows-light-t8-";
+const windowsLight: SlideDocument = {
+  version: 1,
+  title: "Windows Light",
+  canvas: { format: "16:9", width: 1920, height: 1080 },
+  theme: {
+    mode: "light", accent: "#0067c0",
+    background: { type: "solid", color: "#ffffff" },
+    cardStyle: { radius: 6, gap: 12 },
+  },
+  cards: [
+    { id: "t8-taskbar", type: "hero", grid: { x: 0, y: 0, w: 3, h: 3 },
+      style: { background: MS_SKY, textColor: MS_INK },
+      content: { title: msTitle("Thousands of actions *from your taskbar*", 40),
+        image: `${MS_IMG}img4-taskbar.webp`, imagePlacement: "below" } },
+    { id: "t8-surface", type: "hero", grid: { x: 0, y: 3, w: 3, h: 3 },
+      style: { background: MS_SAGE, textColor: MS_INK },
+      content: { title: msTitle("The most *powerful* Surface *ever*", 44),
+        caption: { text: "Surface Laptop Ultra", size: 20 },
+        image: `${MS_IMG}img2-laptop.webp`, imagePlacement: "below" } },
+    { id: "t8-chip", type: "hero", grid: { x: 3, y: 0, w: 6, h: 2 },
+      style: { background: MS_SAGE, textColor: MS_INK },
+      content: { title: msTitle("The most *advanced* Windows laptops ever", 42),
+        caption: { text: "Powered by NVIDIA RTX Spark™", size: 20 },
+        image: `${MS_IMG}img1-chip.webp`, imagePlacement: "left" } },
+    { id: "t8-hero", type: "hero", grid: { x: 3, y: 2, w: 6, h: 2 },
+      style: { background: MS_SKY, textColor: MS_INK },
+      content: { title: msTitle("Hybrid *intelligence*", 96),
+        image: `${MS_IMG}img5-orbit.webp`, imagePlacement: "behind" } },
+    { id: "t8-copilot", type: "hero", grid: { x: 3, y: 4, w: 6, h: 2 },
+      style: { background: MS_SAGE, textColor: MS_INK },
+      content: { title: msTitle("*Coming to* Copilot", 46),
+        image: `${MS_IMG}img6-toggle.webp`, imagePlacement: "right" } },
+    { id: "t8-secure", type: "icon", grid: { x: 9, y: 0, w: 3, h: 1 },
+      style: { background: MS_SKY, textColor: MS_INK },
+      content: { icon: { kind: "image", src: `${MS_IMG}img7-shield.webp` },
+        label: msTitle("The most *secure platform* for agents", 30), layout: "left" } },
+    { id: "t8-deskside", type: "hero", grid: { x: 9, y: 1, w: 3, h: 3 },
+      style: { background: MS_SAGE, textColor: MS_INK },
+      content: { title: msTitle("Datacenter at your *deskside*", 42),
+        caption: { text: "DGX Station for Windows — run trillion parameter models at your desk", size: 18 },
+        image: `${MS_IMG}img3-tower.webp`, imagePlacement: "below" } },
+    { id: "t8-local", type: "hero", grid: { x: 9, y: 4, w: 3, h: 2 },
+      style: { background: MS_SKY, textColor: MS_INK },
+      content: { title: msTitle("Up to 284 billion parameter models run *locally*", 32),
+        caption: { text: "on RTX Spark laptops", size: 20 } } },
+  ],
+};
+
 export const templates: Template[] = [
   { id: "apple-bento-dark", name: "Apple Bento Dark", doc: appleBentoDark },
   { id: "pixel-light", name: "Pixel Light", doc: pixelLight },
@@ -326,5 +384,6 @@ export const templates: Template[] = [
   { id: "chip-spec-dark", name: "Chip Spec Dark", doc: chipSpecDark },
   { id: "developer-keynote-light", name: "Developer Keynote Light", doc: developerKeynoteLight },
   { id: "airpods-light", name: "AirPods Light", doc: airpodsLight },
+  { id: "windows-light", name: "Windows Light", doc: windowsLight },
   { id: "everything", name: "Everything (QA)", doc: kitchenSinkDocument() },
 ];

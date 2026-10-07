@@ -24,6 +24,9 @@ export function RenderPage() {
   useEffect(() => {
     if (!doc) return;
     (async () => {
+      // Force layout first: a face used only by the slide (e.g. the serif italic
+      // emphasis) starts loading at layout, and fonts.ready must see it pending.
+      void document.body.offsetHeight;
       await document.fonts?.ready;
       const imgs = Array.from(document.images);
       await Promise.all(

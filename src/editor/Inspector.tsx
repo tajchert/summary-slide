@@ -116,12 +116,14 @@ export function Inspector() {
       {card.type === "hero" && (
         <>
           {rt("Title", card.content.title, (c, v) => { if (c.type === "hero") c.content.title = v; })}
+          {rt("Caption", card.content.caption ?? { text: "" },
+            (c, v) => { if (c.type === "hero") c.content.caption = v.text ? v : undefined; })}
           <ImageUploadField label="Image (optional)" value={card.content.image ?? ""}
             onChange={(src) => updateCard(card.id, (c) => {
               if (c.type === "hero") c.content.image = src || undefined;
             })} />
           <SelectInput label="Image placement" value={card.content.imagePlacement ?? "behind"}
-            options={["behind", "above", "below"] as const}
+            options={["behind", "above", "below", "left", "right"] as const}
             onChange={(p) => updateCard(card.id, (c) => { if (c.type === "hero") c.content.imagePlacement = p; })} />
         </>
       )}

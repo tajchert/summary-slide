@@ -11,6 +11,8 @@ export const richTextSchema = z.object({
   align: z.enum(["left", "center", "right"]).optional(),
   color: z.string().optional(),                  // hex / css color
   gradient: z.object({ from: z.string(), to: z.string(), angle: z.number() }).optional(),
+  // opt-in: `*word*` runs render in the serif italic stack (absent = literal asterisks)
+  emphasis: z.enum(["serif-italic"]).optional(),
 });
 export type RichText = z.infer<typeof richTextSchema>;
 
@@ -72,8 +74,9 @@ export const cardSchema = z.discriminatedUnion("type", [
   }) }),
   z.object({ ...cardBase, type: z.literal("hero"), content: z.object({
     title: richTextSchema,
+    caption: richTextSchema.optional(),
     image: z.string().optional(),
-    imagePlacement: z.enum(["behind", "above", "below"]).optional(),
+    imagePlacement: z.enum(["behind", "above", "below", "left", "right"]).optional(),
   }) }),
   z.object({ ...cardBase, type: z.literal("list"), content: z.object({
     title: richTextSchema,

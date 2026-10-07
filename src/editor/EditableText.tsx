@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 interface Props {
   text: string;
+  /** What to show when not editing (e.g. emphasis-styled runs); defaults to text. */
+  display?: ReactNode;
   style?: CSSProperties;
   onCommit: (text: string) => void;
 }
 
 /** Double-click to edit in place. className "editable-text" is RGL's draggableCancel. */
-export function EditableText({ text, style, onCommit }: Props) {
+export function EditableText({ text, display, style, onCommit }: Props) {
   const [editing, setEditing] = useState(false);
   const ref = useRef<HTMLSpanElement>(null);
   // cancelled flag: set on Escape so the blur handler does not commit
@@ -41,7 +43,7 @@ export function EditableText({ text, style, onCommit }: Props) {
         suppressContentEditableWarning
         onDoubleClick={() => { cancelled.current = false; setEditing(true); }}
       >
-        {text}
+        {display ?? text}
       </span>
     );
   }

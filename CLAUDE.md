@@ -30,7 +30,9 @@ The editor (`src/editor/EditorCanvas.tsx`) is the one place with a second layout
 src/schema/slide.ts          THE contract: zod schema + types, shared verbatim by SPA and worker.
                              gridSchema refines x+w≤12, y+h≤6. blankDocument() defaults.
 src/render/styleResolve.ts   theme→card→field style cascade; SLIDE_FONT_FAMILY +
-                             SLIDE_MONO_FONT_FAMILY (see invariants)
+                             SLIDE_SERIF_FONT_FAMILY + SLIDE_MONO_FONT_FAMILY (see invariants)
+src/render/emphasis.ts       `*word*` parser for RichText `emphasis: "serif-italic"` (opt-in per
+                             field, so literal asterisks in old docs stay literal)
 src/render/CardView.tsx      dispatch card.type → nine components in src/render/cards/:
                              stat, headline, image, icon, hero, list, iconRow, statGroup, code
 src/render/codeHighlight.tsx sync Prism tokenize → inline-styled spans (see invariant #10)
@@ -55,7 +57,7 @@ wrangler.jsonc               bindings (DB, BUCKET, BROWSER, ASSETS, RATE_LIMITER
 ## Invariants & hard-won gotchas
 
 1. **Quick PNG capture node must be style-clean.** html-to-image clones the target node *with* its inline styles; capturing a node that carries `position:fixed;left:-100000px` renders everything outside the canvas → black PNG. The off-screen positioning lives on an outer wrapper; `toPng` gets the clean inner node. The e2e guards this by decoding the download and counting bright pixels.
-2. **`SLIDE_FONT_FAMILY` / `SLIDE_MONO_FONT_FAMILY` (styleResolve.ts) are the only font stacks** for slide content, and in both, emoji families come **before** the generic fallback (`system-ui` / `monospace`) — Linux/headless Chromium's DejaVu owns a monochrome U+26A1 (⚡) that shadows Noto Color Emoji otherwise.
+2. **`SLIDE_FONT_FAMILY` / `SLIDE_SERIF_FONT_FAMILY` / `SLIDE_MONO_FONT_FAMILY` (styleResolve.ts) are the only font stacks** for slide content (serif = bundled Newsreader italic, used only for `*emphasis*` runs; RenderPage/quickExport force a layout before `document.fonts.ready` because this face is slide-only and would otherwise not be pending yet), and in all of them, emoji families come **before** the generic fallback (`system-ui` / `serif` / `monospace`) — Linux/headless Chromium's DejaVu owns a monochrome U+26A1 (⚡) that shadows Noto Color Emoji otherwise.
 3. **Card `style.background` overrides must ship a `textColor`.** Theme switching keeps overrides; a dark override without explicit text color becomes unreadable in light mode. Template authoring rule, enforced by review not schema.
 4. **Default `gap` is 24 because (1920−13g)/12 must be an integer** — fractional grid tracks break pixel-identical exports across engines.
 5. **Inline editing is context-injected, not forked.** `RichText` renders plain text unless `InlineEditContext` + `InlineEditCardContext` + `editPath` are all present (only the editor provides them). The display span carries class `editable-text` = RGL's `draggableCancel`, so dblclick isn't swallowed by drag. Tradeoff: drags start from card padding, not text.

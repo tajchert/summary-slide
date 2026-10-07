@@ -74,6 +74,20 @@ describe("built-in templates", () => {
     expect(all.some((c) => c.type === "icon" && c.content.caption !== undefined)).toBe(true);
   });
 
+  // Hero images, icon images and image cards alike: a missing file renders as a
+  // broken-image glyph in the thumbnail and the export.
+  it("every bundled template image exists on disk", () => {
+    const srcs = templates.flatMap((t) => t.doc.cards.flatMap((c) => {
+      if (c.type === "image") return [c.content.src];
+      if (c.type === "hero") return c.content.image ? [c.content.image] : [];
+      if (c.type === "icon" && c.content.icon.kind === "image") return [c.content.icon.src];
+      return [];
+    })).filter((src) => src.startsWith("/template-images/"));
+    expect(srcs.length).toBeGreaterThan(0);
+    for (const src of srcs)
+      expect(existsSync(join(process.cwd(), "public", src)), src).toBe(true);
+  });
+
   it("uses generated image assets for showcase image cards", () => {
     for (const [templateId, cardId, src] of expectedTemplateImages) {
       const template = templates.find((t) => t.id === templateId)!;

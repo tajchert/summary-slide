@@ -108,6 +108,11 @@ export function RichTextControls({ label, value, onChange }: {
                   ? { from: "#ff5555", to: "#55aaff", angle: 90 } : undefined })} />
               Gradient text
             </label>
+            <label className="mt-1 flex items-center gap-2 text-xs text-neutral-400">
+              <input type="checkbox" checked={value.emphasis === "serif-italic"}
+                onChange={(e) => patch({ emphasis: e.target.checked ? "serif-italic" : undefined })} />
+              Serif italic for *marked* words
+            </label>
             {value.gradient && (
               <div className="mt-1 grid grid-cols-3 gap-2">
                 <ColorInput label="From" value={value.gradient.from}
