@@ -11,7 +11,7 @@ function Thumb({ template }: { template: Template }) {
 
   useLayoutEffect(() => {
     const el = cellRef.current;
-    if (!el) return;
+    if (!el || typeof ResizeObserver === "undefined") return; // jsdom (gotcha #9)
     const ro = new ResizeObserver(() => {
       setScale(el.clientWidth / 1920);
     });
@@ -19,21 +19,32 @@ function Thumb({ template }: { template: Template }) {
     return () => ro.disconnect();
   }, []);
 
+  // The source link sits beside (not inside) the card link: <a> in <a> is invalid.
   return (
-    <Link
-      key={template.id}
-      to={`/edit?t=${template.id}`}
-      className="group overflow-hidden rounded-xl border border-neutral-800 hover:border-neutral-500"
-    >
-      <div ref={cellRef} className="relative aspect-video overflow-hidden">
-        <div style={{ position: "absolute", width: 1920, height: 1080 }}>
-          <SlideRenderer doc={template.doc} scale={scale} />
+    <div className="group relative overflow-hidden rounded-xl border border-neutral-800 hover:border-neutral-500">
+      <Link to={`/edit?t=${template.id}`} aria-label={template.name} className="block">
+        <div ref={cellRef} className="relative aspect-video overflow-hidden">
+          <div style={{ position: "absolute", width: 1920, height: 1080 }}>
+            <SlideRenderer doc={template.doc} scale={scale} />
+          </div>
         </div>
-      </div>
-      <div className="border-t border-neutral-800 px-3 py-2 text-sm text-neutral-300 group-hover:text-white">
-        {template.name}
-      </div>
-    </Link>
+        <div className="border-t border-neutral-800 px-3 py-2 text-sm text-neutral-300 group-hover:text-white">
+          {template.name}
+        </div>
+      </Link>
+      {template.sourceUrl && (
+        <a
+          href={template.sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`${template.name} source`}
+          title="Compare with the original"
+          className="absolute right-3 bottom-2 text-xs text-neutral-500 hover:text-white hover:underline"
+        >
+          Source ↗
+        </a>
+      )}
+    </div>
   );
 }
 

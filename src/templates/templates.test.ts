@@ -57,6 +57,12 @@ describe("built-in templates", () => {
       expect(c.style?.background, `card ${c.id} has a background override`).toBeUndefined();
   });
 
+  it("source links, when present, are absolute https URLs", () => {
+    const withSource = templates.filter((t) => t.sourceUrl !== undefined);
+    expect(withSource.map((t) => t.id)).toContain("windows-light");
+    for (const t of withSource) expect(new URL(t.sourceUrl!).protocol, t.id).toBe("https:");
+  });
+
   it("covers both light and dark themes", () => {
     const modes = new Set(templates.map((t) => t.doc.theme.mode));
     expect(modes.has("light")).toBe(true);

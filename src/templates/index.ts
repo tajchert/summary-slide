@@ -1,7 +1,11 @@
 import type { Background, RichText, SlideDocument } from "../schema/slide";
 import { kitchenSinkDocument } from "../render/fixtures";
 
-export interface Template { id: string; name: string; doc: SlideDocument }
+export interface Template {
+  id: string; name: string; doc: SlideDocument;
+  /** Original keynote/announcement the template recreates, shown as "Source ↗" for comparison. */
+  sourceUrl?: string;
+}
 
 const appleBentoDark: SlideDocument = {
   version: 1,
@@ -384,6 +388,7 @@ export const templates: Template[] = [
   { id: "chip-spec-dark", name: "Chip Spec Dark", doc: chipSpecDark },
   { id: "developer-keynote-light", name: "Developer Keynote Light", doc: developerKeynoteLight },
   { id: "airpods-light", name: "AirPods Light", doc: airpodsLight },
-  { id: "windows-light", name: "Windows Light", doc: windowsLight },
+  { id: "windows-light", name: "Windows Light", doc: windowsLight,
+    sourceUrl: "https://blogs.windows.com/windowsexperience/2026/10/07/building-windows-for-hybrid-intelligence/" },
   { id: "everything", name: "Everything (QA)", doc: kitchenSinkDocument() },
 ];
