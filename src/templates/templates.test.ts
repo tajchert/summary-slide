@@ -63,6 +63,11 @@ describe("built-in templates", () => {
     for (const t of withSource) expect(new URL(t.sourceUrl!).protocol, t.id).toBe("https:");
   });
 
+  it("iPhone Duo sits right after the classic iPhone template in the gallery", () => {
+    const ids = templates.map((t) => t.id);
+    expect(ids.indexOf("iphone-duo")).toBe(ids.indexOf("apple-bento-dark") + 1);
+  });
+
   it("covers both light and dark themes", () => {
     const modes = new Set(templates.map((t) => t.doc.theme.mode));
     expect(modes.has("light")).toBe(true);

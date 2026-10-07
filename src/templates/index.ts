@@ -380,8 +380,87 @@ const windowsLight: SlideDocument = {
   ],
 };
 
+// Inspired by Apple's foldable iPhone recap slide: pale gray page, theme-colored
+// tiles packed edge to edge, a wide product shot in the middle, and short
+// medium-weight labels set over photos or beside original device illustrations.
+// Layout bands are 1 + 3 + 2 rows. gap 12 keeps tracks integral (gotcha #4).
+// Only the three photo-backed heroes override backgrounds, each with a textColor.
+const DUO_IMG = "/template-images/iphone-duo-t9-";
+const duoLabel = (text: string, size = 26): RichText => ({ text, size, weight: 500, letterSpacing: -0.3 });
+const iphoneDuo: SlideDocument = {
+  version: 1,
+  title: "iPhone Duo",
+  canvas: { format: "16:9", width: 1920, height: 1080 },
+  theme: {
+    mode: "light", accent: "#0071e3",
+    background: { type: "solid", color: "#dcdce1" },
+    cardStyle: { radius: 28, gap: 12 },
+  },
+  cards: [
+    // top band (row 0)
+    { id: "t9-siri", type: "icon", grid: { x: 0, y: 0, w: 1, h: 1 },
+      content: { icon: { kind: "image", src: `${DUO_IMG}img1-siri.webp` },
+        label: duoLabel("Siri AI", 22), layout: "top" } },
+    { id: "t9-nano", type: "image", grid: { x: 1, y: 0, w: 2, h: 1 },
+      content: { src: `${DUO_IMG}img2-nano.webp`, fit: "cover",
+        overlay: { text: duoLabel("Nano-texture display", 24), placement: "bottom" } } },
+    { id: "t9-vapor", type: "hero", grid: { x: 3, y: 0, w: 2, h: 1 },
+      style: { background: { type: "solid", color: "#eef0f3" }, textColor: "#1d1d1f" },
+      content: { title: { text: "Vapor chamber", size: 38, weight: 600, letterSpacing: -1 },
+        image: `${DUO_IMG}img3-vapor.webp`, imagePlacement: "behind" } },
+    { id: "t9-take", type: "image", grid: { x: 5, y: 0, w: 2, h: 1 },
+      content: { src: `${DUO_IMG}img4-take.webp`, fit: "cover",
+        overlay: { text: duoLabel("Smart Take", 24), placement: "bottom" } } },
+    { id: "t9-multi", type: "hero", grid: { x: 7, y: 0, w: 2, h: 1 },
+      content: { title: duoLabel("Multitasking", 24),
+        image: `${DUO_IMG}img5-multi.webp`, imagePlacement: "left" } },
+    { id: "t9-styles", type: "image", grid: { x: 9, y: 0, w: 3, h: 1 },
+      content: { src: `${DUO_IMG}img6-styles.webp`, fit: "cover",
+        overlay: { text: duoLabel("Photographic Styles with texture control", 24), placement: "bottom" } } },
+    // middle band (rows 1–3)
+    { id: "t9-display", type: "hero", grid: { x: 0, y: 1, w: 3, h: 2 },
+      content: { title: duoLabel("Largest iPhone display ever"),
+        image: `${DUO_IMG}img7-display.webp`, imagePlacement: "above" } },
+    { id: "t9-thin", type: "hero", grid: { x: 0, y: 3, w: 3, h: 1 },
+      content: { title: duoLabel("Thinnest iPhone ever"),
+        image: `${DUO_IMG}img8-thin.webp`, imagePlacement: "below" } },
+    { id: "t9-hero", type: "image", grid: { x: 3, y: 1, w: 6, h: 3 },
+      content: { src: `${DUO_IMG}img9-hero.webp`, fit: "contain" } },
+    { id: "t9-chip", type: "stat", grid: { x: 9, y: 1, w: 2, h: 2 },
+      style: { background: { type: "gradient", from: "#f4f4f6", to: "#a9a9b0", angle: 160 },
+        textColor: "#1d1d1f" },
+      content: { value: { text: "A20", size: 84, weight: 600, letterSpacing: -2 },
+        caption: { text: "PRO", size: 32, weight: 600, color: "#1d1d1f" } } },
+    { id: "t9-battery", type: "icon", grid: { x: 11, y: 1, w: 1, h: 2 },
+      content: { icon: { kind: "image", src: `${DUO_IMG}img10-battery.webp` },
+        label: duoLabel("All-day battery\u00a0life", 22), layout: "top" } },
+    { id: "t9-ios", type: "hero", grid: { x: 9, y: 3, w: 3, h: 1 },
+      content: { title: { text: "Reimagined iOS", size: 40, weight: 600, letterSpacing: -1 },
+        image: `${DUO_IMG}img11-ios.webp`, imagePlacement: "right" } },
+    // bottom band (rows 4–5)
+    { id: "t9-versatile", type: "hero", grid: { x: 0, y: 4, w: 4, h: 2 },
+      content: { title: duoLabel("Most versatile iPhone"),
+        image: `${DUO_IMG}img12-postures.webp`, imagePlacement: "below" } },
+    { id: "t9-titanium", type: "hero", grid: { x: 4, y: 4, w: 2, h: 2 },
+      style: { background: { type: "solid", color: "#050505" }, textColor: "#ffffff" },
+      content: { title: { text: "Grade 5 titanium", size: 48, weight: 600, letterSpacing: -1.5 },
+        image: `${DUO_IMG}img13-titanium.webp`, imagePlacement: "behind" } },
+    { id: "t9-ceramic", type: "hero", grid: { x: 6, y: 4, w: 3, h: 2 },
+      // no-break spaces inside each phrase force the reference's two-line break
+      content: { title: duoLabel("Ceramic\u00a0Shield\u00a02\u00a0front Ceramic\u00a0Shield\u00a0back"),
+        image: `${DUO_IMG}img14-ceramic.webp`, imagePlacement: "below" } },
+    { id: "t9-stage", type: "image", grid: { x: 9, y: 4, w: 1, h: 2 },
+      content: { src: `${DUO_IMG}img15-stage.webp`, fit: "cover",
+        overlay: { text: duoLabel("Center Stage front camera", 20), placement: "bottom" } } },
+    { id: "t9-camera", type: "hero", grid: { x: 10, y: 4, w: 2, h: 2 },
+      content: { title: duoLabel("48MP Dual Fusion camera system"),
+        image: `${DUO_IMG}img16-camera.webp`, imagePlacement: "below" } },
+  ],
+};
+
 export const templates: Template[] = [
   { id: "apple-bento-dark", name: "Apple Bento Dark", doc: appleBentoDark },
+  { id: "iphone-duo", name: "iPhone Duo", doc: iphoneDuo },
   { id: "pixel-light", name: "Pixel Light", doc: pixelLight },
   { id: "spec-sheet-dark", name: "Spec Sheet Dark", doc: specSheetDark },
   { id: "launch-light", name: "Launch Light", doc: launchLight },
